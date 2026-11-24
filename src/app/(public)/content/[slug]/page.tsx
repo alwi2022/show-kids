@@ -1,3 +1,4 @@
+import { ArticleBody } from "@/components/public/article-body";
 import { ContentImage } from "@/components/ui/content-image";
 import { cache } from "react";
 import Link from "next/link";
@@ -142,13 +143,11 @@ export default async function Detail({ params }: Props) {
           <div className="detail-body">
             {content.type === "Video" ? (
               <VideoDescription description={content.description} />
+            ) : content.type === "Artikel" ? (
+              <ArticleBody value={content.description} />
             ) : (
               <>
-                <h2>
-                  {content.type === "Artikel"
-                    ? "Bacaan untuk orang tua"
-                    : "Tentang worksheet"}
-                </h2>
+                <h2>Tentang worksheet</h2>
                 <p className="detail-intro">{paragraphs[0]}</p>
                 <div className="detail-prose">
                   {paragraphs.slice(1).map((paragraph, i) => (

@@ -1,4 +1,5 @@
 "use client";
+import { articleHtml } from "@/lib/article";
 import { ContentImage } from "@/components/ui/content-image";
 import type { ContentInput } from "@/lib/content";
 import { formatDuration, videoEmbed, demoAsset } from "@/lib/content";
@@ -98,13 +99,22 @@ export function ContentPreview({
             ? "Bacaan untuk orang tua"
             : "Tentang konten ini"}
         </h3>
-        {(data.description || "Deskripsi konten akan ditampilkan di sini.")
-          .split(/\n\s*\n/)
-          .map((paragraph, index) => (
-            <p className="cms-preview-paragraph" key={index}>
-              {paragraph}
-            </p>
-          ))}
+        {data.type === "Artikel" ? (
+          <div
+            className="article-prose"
+            dangerouslySetInnerHTML={{ __html: articleHtml(data.description) }}
+          />
+        ) : (
+          <>
+            {(data.description || "Deskripsi konten akan ditampilkan di sini.")
+              .split(/\n\s*\n/)
+              .map((paragraph, index) => (
+                <p className="cms-preview-paragraph" key={index}>
+                  {paragraph}
+                </p>
+              ))}
+          </>
+        )}
       </article>
     </aside>
   );

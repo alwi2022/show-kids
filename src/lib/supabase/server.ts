@@ -7,6 +7,9 @@ export async function serverClient() {
   const { url, key } = supabaseConfig();
   const store = await cookies();
   return createServerClient(url, key, {
+    global: {
+      fetch: (input, init) => fetch(input, { ...init, cache: "no-store" }),
+    },
     cookies: {
       getAll: () => store.getAll(),
       setAll(values) {

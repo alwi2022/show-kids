@@ -23,6 +23,7 @@ test("migrations enforce role membership, publication, constraints and storage a
       "202611230001_content_and_admin.sql",
       "202611230002_storage.sql",
       "202611230003_categories.sql",
+      "202611230004_article_images.sql",
     ])
       await db.exec(
         await readFile(
@@ -214,6 +215,28 @@ test("migrations enforce role membership, publication, constraints and storage a
       ).rows[0].description,
       "Edited by admin",
     );
+    await db.exec(`insert into storage.objects(bucket_id,name) values ('thumbnails','00000000-0000-4000-8000-000000000099.jpg');
+      update public.contents set description='<p>Foto</p><img src="/article-images/00000000-0000-4000-8000-000000000099.jpg" alt="Foto">' where slug='demo-reading'; set request.jwt.claim.sub = ''; set role anon;`);
+    assert.equal(
+      (
+        await db.query(
+          "select * from storage.objects where name='00000000-0000-4000-8000-000000000099.jpg'",
+        )
+      ).rows.length,
+      1,
+    );
+    await db.exec(
+      "reset role; update public.contents set published=false where slug='demo-reading'; set role anon;",
+    );
+    assert.equal(
+      (
+        await db.query(
+          "select * from storage.objects where name='00000000-0000-4000-8000-000000000099.jpg'",
+        )
+      ).rows.length,
+      0,
+    );
+    await db.exec("reset role;");
   } finally {
     await db.close();
   }

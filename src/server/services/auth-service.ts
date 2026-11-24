@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { isSupabaseConfigured } from "@/lib/config";
 import { serverClient } from "@/lib/supabase/server";
 import { adminMembership } from "@/server/repositories/admin-repository";
+import { cache } from "react";
 
 export class AppError extends Error {
   constructor(
@@ -13,7 +14,7 @@ export class AppError extends Error {
     super(message);
   }
 }
-export async function getAdmin() {
+export const getAdmin = cache(async function getAdmin() {
   if (!isSupabaseConfigured()) return null;
   const client = await serverClient();
   const {
@@ -26,7 +27,7 @@ export async function getAdmin() {
   } catch {
     throw new AppError("Hak akses belum dapat diperiksa. Coba kembali.", 503);
   }
-}
+});
 export async function authenticate(credentials: {
   email: string;
   password: string;

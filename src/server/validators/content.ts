@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { contentTypes, slugify, videoEmbed, demoAsset } from "@/lib/content";
+import { articleHtml, articleText } from "@/lib/article";
 
 export function plainText(value: unknown) {
   return typeof value === "string"
@@ -72,6 +73,12 @@ export const contentSchema = z
     focus_keyword: z.string().max(100),
   })
   .superRefine((data, ctx) => {
+    if (data.type === "Artikel" && !articleText(data.description))
+      ctx.addIssue({
+        code: "custom",
+        path: ["description"],
+        message: "Isi artikel wajib diisi.",
+      });
     if (data.type === "Video" && !videoEmbed(data.media_url))
       ctx.addIssue({
         code: "custom",
@@ -100,7 +107,10 @@ export function parseContent(form: FormData) {
     slug: text("slug") || slugify(title),
     category: text("category"),
     type: text("type"),
-    description: text("description"),
+    description:
+      text("type") === "Artikel"
+        ? articleHtml(String(form.get("description") || ""))
+        : text("description"),
     thumbnail: text("thumbnail"),
     alt_text: text("alt_text"),
     media_url: text("media_url"),

@@ -8,7 +8,7 @@ import { parseContent } from "@/server/validators/content";
 import { AppError, requireAdmin } from "@/server/services/auth-service";
 import type { Content, Filters } from "@/lib/content";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { categoryNames } from "./category-service";
+import { CategoryRepository } from "@/server/repositories/category-repository";
 import { featuredSlugs } from "@/lib/featured-content";
 
 export function splitStorageRef(value: string) {
@@ -129,7 +129,12 @@ function inspectFile(buffer: Buffer, pdf: boolean) {
 }
 export async function saveContent(form: FormData, id?: string) {
   const { client } = await requireAdmin();
-  if (!(await categoryNames()).includes(String(form.get("category") || "")))
+  const category = String(form.get("category") || "").trim();
+  if (
+    !(await new CategoryRepository(client).all()).some(
+      (row) => row.name === category,
+    )
+  )
     throw new AppError("Pilih kategori yang tersedia.", 422, {
       category:
         "Kategori tidak ditemukan. Muat ulang untuk memperbarui pilihan.",

@@ -3,7 +3,7 @@ export default function Loading() {
   return (
     <main
       id="main"
-      className="container status-page"
+      className="container admin-main"
       aria-live="polite"
       aria-busy="true"
     >

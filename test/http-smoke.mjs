@@ -122,6 +122,8 @@ const api = createServer((req, res) => {
         slug: "test-fixture-article",
         title: "Test fixture article",
         type: "Artikel",
+        description:
+          "<p>Intro artikel.</p><h2>Aktivitas bersama</h2><p><strong>Baca</strong> bersama.</p><h3>Persiapan</h3><ul><li>Kertas</li></ul>",
         media_url: "",
         duration: null,
       },
@@ -275,7 +277,14 @@ try {
   ).text();
   assert.ok(article.split("</head>")[0].includes('"@type":"Article"'));
   assert.ok(
-    article.includes("detail-intro") &&
+    article.includes("Daftar isi") &&
+      article.includes('href="#bagian-1"') &&
+      article.includes('<h2 id="bagian-1">Aktivitas bersama</h2>') &&
+      article.includes("<strong>Baca</strong>"),
+    "rich article and table of contents render in server HTML",
+  );
+  assert.ok(
+    article.includes("article-prose") &&
       article.includes("Semua tips parenting"),
   );
   assert.ok(

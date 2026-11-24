@@ -1,9 +1,8 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 export function LoginForm({ available }: { available: boolean }) {
-  const router = useRouter();
+  const [redirecting, setRedirecting] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   return (
@@ -28,8 +27,8 @@ export function LoginForm({ available }: { available: boolean }) {
             setError(result.message);
             return;
           }
-          router.replace("/admin");
-          router.refresh();
+          setRedirecting(true);
+          window.location.replace("/admin");
         } catch {
           setError("Koneksi terputus. Periksa jaringan dan coba kembali.");
         } finally {
@@ -71,9 +70,13 @@ export function LoginForm({ available }: { available: boolean }) {
         whileTap={{ scale: 0.98 }}
         className="button green"
         type="submit"
-        disabled={busy || !available}
+        disabled={busy || redirecting || !available}
       >
-        {busy ? "Memeriksa akun..." : "Masuk ke CMS"}
+        {redirecting
+          ? "Membuka workspace..."
+          : busy
+            ? "Memeriksa akun..."
+            : "Masuk ke CMS"}
       </motion.button>
     </form>
   );

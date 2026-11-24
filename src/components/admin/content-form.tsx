@@ -1,4 +1,6 @@
 "use client";
+import { ArticleEditor } from "./article-editor";
+import { articlePlainText } from "@/lib/article";
 import { ContentImage } from "@/components/ui/content-image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -238,6 +240,11 @@ export function ContentForm({
                       setData((prev) => ({
                         ...prev,
                         type: e.target.value as ContentInput["type"],
+                        description:
+                          prev.type === "Artikel" &&
+                          e.target.value !== "Artikel"
+                            ? articlePlainText(prev.description)
+                            : prev.description,
                         media_url: "",
                         duration: null,
                       }))
@@ -252,19 +259,28 @@ export function ContentForm({
               </div>
               <div className="field">
                 <label htmlFor="description">Deskripsi / isi artikel *</label>
-                <textarea
-                  id="description"
-                  name="description"
-                  rows={10}
-                  required
-                  maxLength={20000}
-                  value={data.description}
-                  onChange={(e) => update("description", e.target.value)}
-                  aria-invalid={Boolean(errors.description)}
-                  aria-describedby={
-                    errors.description ? "description-error" : undefined
-                  }
-                />
+                {data.type === "Artikel" ? (
+                  <ArticleEditor
+                    value={data.description}
+                    onChange={(value) => update("description", value)}
+                    disabled={busy}
+                    invalid={Boolean(errors.description)}
+                  />
+                ) : (
+                  <textarea
+                    id="description"
+                    name="description"
+                    rows={10}
+                    required
+                    maxLength={20000}
+                    value={data.description}
+                    onChange={(e) => update("description", e.target.value)}
+                    aria-invalid={Boolean(errors.description)}
+                    aria-describedby={
+                      errors.description ? "description-error" : undefined
+                    }
+                  />
+                )}
                 {error("description")}
               </div>
             </div>

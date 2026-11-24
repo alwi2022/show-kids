@@ -997,3 +997,106 @@
 .cms-table td {
   overflow-wrap: anywhere;
 }
+.cms-shell .confirm-dialog {
+  border-radius: 8px;
+  border-color: #dfe3e9;
+  background: #fff;
+  box-shadow: none;
+}
+.cms-shell .confirm-dialog::backdrop {
+  background: rgb(8 10 18 / 24%);
+  backdrop-filter: none;
+}
+.article-editor {
+  border: 1px solid #818a99;
+  border-radius: 6px;
+  background: white;
+  overflow: hidden;
+}
+.article-editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 8px;
+  border-bottom: 1px solid #dfe3e9;
+  background: #f7f8fa;
+}
+.article-editor-toolbar button {
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  font-size: 0.8125rem;
+}
+.article-editor-toolbar button:hover,
+.article-editor-toolbar button[aria-pressed="true"] {
+  background: #e7ebf2;
+  border-color: #818a99;
+}
+.article-editor .tiptap {
+  min-height: 320px;
+  padding: 20px;
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+.article-editor .tiptap:focus {
+  outline: 2px solid #2552d9;
+  outline-offset: -2px;
+}
+.article-editor .tiptap h2 {
+  font-size: 1.5rem;
+  margin: 24px 0 12px;
+}
+.article-editor .tiptap h3 {
+  font-size: 1.2rem;
+  margin: 20px 0 10px;
+}
+.article-editor .tiptap p {
+  margin-bottom: 16px;
+}
+.article-editor .tiptap ul,
+.article-editor .tiptap ol {
+  padding-left: 24px;
+}
+.article-editor .tiptap blockquote {
+  border-left: 3px solid #8791ac;
+  padding-left: 16px;
+  margin: 20px 0;
+}
+.article-editor-toolbar button {
+  width: 38px;
+  height: 38px;
+  padding: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.article-editor-toolbar button:nth-child(3),
+.article-editor-toolbar button:nth-child(6),
+.article-editor-toolbar button:nth-child(9) {
+  margin-left: 8px;
+}
+.article-insert-panel {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-bottom: 1px solid #dfe3e9;
+  background: #f7f8fa;
+}
+.article-insert-panel label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+.article-editor .tiptap img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin: 20px 0;
+}
+.article-editor .tiptap a {
+  color: #2552d9;
+  text-decoration: underline;
+}
