@@ -1,0 +1,2 @@
+-- No invented videos or worksheets are published automatically.
+-- Create verified content through the CMS after provisioning an admin account.
