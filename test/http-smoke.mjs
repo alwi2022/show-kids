@@ -215,6 +215,14 @@ try {
   }
   assert.ok(ready, `Next server did not become ready: ${output}`);
   const home = await (await fetch(base)).text();
+  for (const path of ["/content/not-existing-review-slug", "/not-existing-review-route"]) {
+    const missing = await fetch(`${base}${path}`);
+    const html = await missing.text();
+    assert.equal(missing.status, 404, `${path} returns HTTP 404`);
+    assert.equal((html.match(/<h1(?:\s|>)/g) || []).length, 1, `${path} renders one H1 without JavaScript`);
+    assert.ok(html.includes('href="/"'), `${path} offers a route home`);
+    assert.ok(html.includes('name="robots" content="noindex'), `${path} is not indexable`);
+  }
   assert.equal((home.match(/<h1(?:\s|>)/g) || []).length, 1);
   assert.ok(home.includes(fixture.title), "public content must be in SSR HTML");
   assert.ok(

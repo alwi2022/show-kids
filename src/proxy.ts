@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
 import { isSupabaseConfigured, supabaseConfig } from "@/lib/config";
 export async function proxy(request: NextRequest) {
@@ -7,6 +8,27 @@ export async function proxy(request: NextRequest) {
   const match = /^\/content\/([^/]+)\/?$/.exec(request.nextUrl.pathname);
   if (match) requestHeaders.set("x-content-slug", match[1]);
   let response = NextResponse.next({ request: { headers: requestHeaders } });
+  if (match && isSupabaseConfigured()) {
+    const { url, key } = supabaseConfig();
+    const client = createClient(url, key, {
+      auth: { persistSession: false, autoRefreshToken: false },
+      global: { fetch: (input, init) => fetch(input, { ...init, cache: "no-store" }) },
+    });
+    const { data, error } = await client
+      .from("contents")
+      .select("id")
+      .eq("slug", match[1])
+      .eq("published", true)
+      .maybeSingle();
+    if (!error && !data) {
+      // Resolve missing content before rendering so Next returns the 404 HTML shell.
+      requestHeaders.delete("x-content-slug");
+      return NextResponse.rewrite(new URL("/404", request.url), {
+        status: 404,
+        request: { headers: requestHeaders },
+      });
+    }
+  }
   if (!isSupabaseConfigured()) {
     if (
       request.nextUrl.pathname.startsWith("/admin") &&

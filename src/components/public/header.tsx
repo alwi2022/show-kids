@@ -41,6 +41,17 @@ export function Header() {
   const toggle = useRef<HTMLButtonElement>(null);
   const reduced = useReducedMotion();
   useEffect(() => { setOpen(false); setSearchOpen(false); }, [pathname]);
+  useEffect(() => {
+    if (!open) return;
+    function escape(event: KeyboardEvent) {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      setOpen(false);
+      toggle.current?.focus();
+    }
+    document.addEventListener("keydown", escape);
+    return () => document.removeEventListener("keydown", escape);
+  }, [open]);
   return (
     <header className="site-header">
       <div className="container header-inner">
@@ -88,12 +99,6 @@ export function Header() {
             animate={{ height: "auto" }}
             exit={{ height: 0 }}
             transition={{ duration: 0.15 }}
-            onKeyDown={(event) => {
-              if (event.key === "Escape") {
-                setOpen(false);
-                toggle.current?.focus();
-              }
-            }}
           >
             {links.map((link) => (
               <Link

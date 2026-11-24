@@ -119,6 +119,7 @@ npm start
 - Worksheet menyediakan **Unduh PDF** langsung dan **Buka PDF** di tab baru, ditempatkan di bawah gambar.
 - Artikel menampilkan format rich text dan daftar isi otomatis dari H2/H3. Tanpa heading H2/H3, daftar isi tidak ditampilkan.
 - Draft dan slug yang tidak ditemukan menghasilkan 404 pada detail publik.
+- Halaman 404 custom memakai identitas SHOW Kids, satu H1 pada HTML awal, dan navigasi kembali ke beranda/video/worksheet. Escape pada menu mobile menutup navigasi dan mengembalikan fokus ke tombol Menu.
 
 ## CMS dan SEO Manager
 

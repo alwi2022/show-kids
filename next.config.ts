@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 const config: NextConfig = {
   distDir: process.env.NEXT_BUILD_DIR || '.next',
   poweredByHeader: false,
-  experimental: { proxyClientMaxBodySize: "5mb" },
+  experimental: { proxyClientMaxBodySize: "5mb", globalNotFound: true },
   async headers() {
     return [
       {
