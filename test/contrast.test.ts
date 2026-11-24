@@ -12,13 +12,21 @@ const ratio = (a: string, b: string) => {
   return (l[0] + 0.05) / (l[1] + 0.05);
 };
 test("design text combinations meet AA and field boundaries are visible", () => {
-  const backgrounds = ["#ffffff", "#fcfdf9", "#edf5e9", "#fff4cd", "#f6ca45"];
+  const backgrounds = ["#ffffff", "#fafbff", "#eef2ff", "#f0eaff", "#e2dcff", "#dceaff", "#eee5ff", "#ece6ff"];
   for (const bg of backgrounds) {
-    assert.ok(ratio("#17382f", bg) >= 4.5, `ink on ${bg}`);
-    if (bg !== "#f6ca45")
-      assert.ok(ratio("#52665e", bg) >= 4.5, `muted on ${bg}`);
+    assert.ok(ratio("#182044", bg) >= 4.5, `ink on ${bg}`);
+    assert.ok(ratio("#526080", bg) >= 4.5, `muted on ${bg}`);
   }
-  assert.ok(ratio("#ffffff", "#216345") >= 4.5);
+  for (const stop of ["#2552d9", "#7042df"])
+    assert.ok(ratio("#ffffff", stop) >= 4.5);
+  for (const stop of ["#07152f", "#172454", "#291950", "#303877"]) {
+    assert.ok(ratio("#d8e2ff", stop) >= 4.5);
+    assert.ok(ratio("#b8ccff", stop) >= 4.5);
+  }
   assert.ok(ratio("#ffffff", "#a52424") >= 4.5);
-  assert.ok(ratio("#83948a", "#ffffff") >= 3);
+  assert.ok(ratio("#8791ac", "#ffffff") >= 3);
+  for (const text of ["#d8e8ff", "#91baff", "#c8b2ff", "#bfc5d5"]) {
+    assert.ok(ratio(text, "#06070c") >= 4.5, `hero text ${text}`);
+  }
+  assert.ok(ratio("#bfc5d5", "#10121b") >= 4.5);
 });

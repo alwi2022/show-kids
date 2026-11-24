@@ -18,7 +18,12 @@ export default async function LoginPage() {
           cerita berikutnya.
         </h1>
         <p>Kelola konten yang mengajak si kecil mengenal dunia.</p>
-        <img src="/assets/discovery.svg" alt="" width="360" height="350" />
+        <img
+          src="/assets/show/show-token.png"
+          alt=""
+          width="360"
+          height="350"
+        />
       </div>
       <div className="login-panel">
         <Link className="back-link" href="/">

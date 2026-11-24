@@ -6,8 +6,13 @@ import { Icon } from "@/components/ui/icon";
 export function Wordmark() {
   return (
     <span className="wordmark">
-      SHOW<span>kids</span>
-      <i aria-hidden="true">.</i>
+      <img
+        src="/assets/show/show-logo.png"
+        alt="SHOW"
+        width="146"
+        height="40"
+      />
+      <span>kids</span>
     </span>
   );
 }
@@ -34,16 +39,9 @@ export function Header() {
           ))}
         </nav>
         <div className="header-actions">
-          <Link
-            href="/#search"
-            className="icon-button"
-            aria-label="Cari konten"
-          >
-            <Icon name="search" />
-          </Link>
-          <Link href="/admin" className="admin-link">
+          <Link href="/admin" className="admin-login-link">
             <Icon name="admin" />
-            <span>Admin</span>
+            <span>Login Admin</span>
           </Link>
           <button
             ref={toggle}

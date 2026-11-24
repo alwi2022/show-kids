@@ -5,6 +5,7 @@ import { publicCatalogue } from "@/server/services/content-service";
 import { parseFilters, type Filters } from "@/lib/content";
 import { Catalogue } from "@/components/public/catalogue";
 import { Icon } from "@/components/ui/icon";
+import { ExploreStories, SingAlong } from "@/components/public/discovery";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { alternates: { canonical: "/" } };
 async function CatalogueData({ filters }: { filters: Filters }) {
@@ -18,46 +19,43 @@ export default async function Home({
 }) {
   const filters = parseFilters(await searchParams);
   return (
-    <main id="main">
+    <main id="main" className="landing-page">
       <section className="hero">
         <div className="container hero-inner">
           <div className="hero-copy">
-            <p className="hero-intro">Dunia kecil, penemuan besar.</p>
             <h1>
               Rasa ingin tahu
               <br />
-              mulai dari <span>sini.</span>
+              <span>mulai dari sini.</span>
             </h1>
             <p className="hero-description">
-              Dari lagu pertama sampai pertanyaan tentang dunia. Temukan hal
-              baru dan nikmati waktu belajar bersama si kecil.
+              Video dan aktivitas dari SHOW Kids untuk menemani si kecil
+              mengenal dunia, satu cerita setiap hari.
             </p>
-            <Link className="button yellow hero-cta" href="#catalog">
+            <Link className="button green hero-cta" href="#catalog">
               <Icon name="play" />
-              Jelajahi konten
+              Pilih tontonan
             </Link>
           </div>
-          <div className="hero-art">
-            <div className="art-backdrop" />
+          <div className="hero-dragon">
             <img
-              src="/assets/discovery.svg"
-              alt="Dua karakter bersahabat dari ilustrasi penjelajahan"
-              width="520"
-              height="510"
+              src="/assets/show/hero-dragon.png"
+              alt="Naga kecil biru yang ramah menyapa anak-anak"
+              width="1024"
+              height="1024"
               fetchPriority="high"
             />
-            <div className="art-caption">
-              <Icon name="leaf" />
-              <span>
-                Banyak hal kecil
-                <br />
-                <strong>untuk ditemukan.</strong>
-              </span>
-            </div>
           </div>
         </div>
-        <div className="hero-bottom" aria-hidden="true" />
       </section>
+      {!filters.q &&
+        !filters.category &&
+        !filters.type &&
+        filters.page === 1 && (
+          <Suspense fallback={null}>
+            <ExploreStories />
+          </Suspense>
+        )}
       <Suspense
         key={JSON.stringify(filters)}
         fallback={
@@ -105,6 +103,14 @@ export default async function Home({
           </div>
         </Link>
       </section>
+      {!filters.q &&
+        !filters.category &&
+        !filters.type &&
+        filters.page === 1 && (
+          <Suspense fallback={null}>
+            <SingAlong />
+          </Suspense>
+        )}
     </main>
   );
 }

@@ -3,6 +3,7 @@ import { createServer } from "node:http";
 import { spawn } from "node:child_process";
 import { once } from "node:events";
 import { createRequire } from "node:module";
+import { readFile, writeFile } from "node:fs/promises";
 
 const require = createRequire(import.meta.url);
 const fixture = {
@@ -28,15 +29,29 @@ const fixture = {
 const api = createServer((req, res) => {
   const url = new URL(req.url, "http://localhost");
   if (url.pathname === "/rest/v1/contents") {
-    let rows = [fixture, { ...fixture, id: '00000000-0000-4000-8000-000000000011', slug: 'test-fixture-article', title: 'Test fixture article', type: 'Artikel', media_url: '', duration: null }];
+    let rows = [
+      fixture,
+      {
+        ...fixture,
+        id: "00000000-0000-4000-8000-000000000011",
+        slug: "test-fixture-article",
+        title: "Test fixture article",
+        type: "Artikel",
+        media_url: "",
+        duration: null,
+      },
+    ];
     if (url.searchParams.has("slug"))
       rows = rows.filter(
         (c) => `eq.${c.slug}` === url.searchParams.get("slug"),
       );
     if (url.searchParams.has("id"))
       rows = rows.filter((c) => `eq.${c.id}` === url.searchParams.get("id"));
-    if (url.searchParams.has('type')) rows = rows.filter(c => `eq.${c.type}` === url.searchParams.get('type'));
-    if (url.searchParams.get('or')?.includes('unmatched')) rows = [];
+    if (url.searchParams.has("type"))
+      rows = rows.filter(
+        (c) => `eq.${c.type}` === url.searchParams.get("type"),
+      );
+    if (url.searchParams.get("or")?.includes("unmatched")) rows = [];
     res.setHeader("Content-Type", "application/json");
     res.setHeader(
       "Content-Range",
@@ -51,17 +66,36 @@ api.listen(0, "127.0.0.1");
 await once(api, "listening");
 const base = "http://localhost:3101";
 let output = "";
+const originalNextEnv = await readFile("next-env.d.ts", "utf8");
+const originalTsconfig = await readFile("tsconfig.json", "utf8");
+const testEnv = {
+  ...process.env,
+  NODE_ENV: "production",
+  NEXT_BUILD_DIR: ".next-http",
+  NEXT_PUBLIC_SITE_URL: base,
+  NEXT_PUBLIC_SUPABASE_URL: `http://127.0.0.1:${api.address().port}`,
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "automated-test-only",
+};
+const build = spawn(
+  process.execPath,
+  [require.resolve("next/dist/bin/next"), "build"],
+  { env: testEnv, stdio: ["ignore", "pipe", "pipe"] },
+);
+let buildOutput = "";
+build.stdout.on("data", (chunk) => (buildOutput += chunk));
+build.stderr.on("data", (chunk) => (buildOutput += chunk));
+const [buildCode] = await once(build, "exit");
+await writeFile("next-env.d.ts", originalNextEnv);
+await writeFile("tsconfig.json", originalTsconfig);
+if (buildCode !== 0) {
+  api.close();
+  throw new Error(`Isolated HTTP test build failed: ${buildOutput}`);
+}
 const app = spawn(
   process.execPath,
   [require.resolve("next/dist/bin/next"), "start", "--port", "3101"],
   {
-    env: {
-      ...process.env,
-      NODE_ENV: "production",
-      NEXT_PUBLIC_SITE_URL: base,
-      NEXT_PUBLIC_SUPABASE_URL: `http://127.0.0.1:${api.address().port}`,
-      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "automated-test-only",
-    },
+    env: testEnv,
     stdio: ["ignore", "pipe", "pipe"],
   },
 );
@@ -82,6 +116,34 @@ try {
   const home = await (await fetch(base)).text();
   assert.equal((home.match(/<h1(?:\s|>)/g) || []).length, 1);
   assert.ok(home.includes(fixture.title), "public content must be in SSR HTML");
+  assert.ok(home.includes('Hari ini, mau tahu apa?'), 'published content powers topic discovery');
+  assert.ok(!home.includes('dragon-flame') && !home.includes('Buat naga menyemburkan api'), 'dragon no longer has a fire interaction');
+  assert.ok(
+    home.includes('href="/admin"'),
+    "public homepage exposes admin login as required by assessment",
+  );
+  const publicHeader = home.split("</header>")[0];
+  assert.ok(
+    !publicHeader.includes('href="/#search"'),
+    "navbar has no search shortcut",
+  );
+  assert.ok(
+    home.includes('id="content-search"'),
+    "catalogue search remains available",
+  );
+  assert.ok(
+    !home.includes('<canvas'),
+    "background has no WebGL canvas",
+  );
+  assert.ok(!home.includes('id="playground-title"'), "playground is removed");
+  assert.ok(
+    home.includes("/assets/show/hero-dragon.png"),
+    "hero uses dragon artwork",
+  );
+  assert.ok(
+    home.includes("/assets/show/show-logo.png"),
+    "public header uses sourced SHOW logo",
+  );
   const response = await fetch(`${base}/content/${fixture.slug}`);
   assert.equal(response.status, 200);
   const detail = await response.text();
@@ -94,10 +156,13 @@ try {
   assert.ok(head.includes("application/ld+json"), "JSON-LD must be in head");
   assert.ok(head.includes("VideoObject"));
   assert.equal((detail.match(/<h1(?:\s|>)/g) || []).length, 1);
-  const article = await (await fetch(`${base}/content/test-fixture-article`)).text();
-  assert.ok(article.split('</head>')[0].includes('"@type":"Article"'));
+  const article = await (
+    await fetch(`${base}/content/test-fixture-article`)
+  ).text();
+  assert.ok(article.split("</head>")[0].includes('"@type":"Article"'));
   const empty = await (await fetch(`${base}/?q=unmatched`)).text();
-  assert.ok(empty.includes('Belum ada yang cocok'));
+  assert.ok(empty.includes("Belum ada yang cocok"));
+  assert.ok(!empty.includes('Hari ini, mau tahu apa?'), 'search results do not repeat homepage discovery');
   assert.ok(!empty.includes(fixture.title));
   assert.equal((await fetch(`${base}/content/unpublished`)).status, 404);
   assert.equal(

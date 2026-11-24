@@ -6,6 +6,7 @@ import { publicContent } from "@/server/services/content-service";
 import { contentSchema, jsonLd } from "@/lib/seo";
 import "./globals.css";
 export const metadata: Metadata = {
+  icons: { icon: "/assets/show/show-kids-avatar.jpg" },
   metadataBase: new URL(siteUrl),
   title: "SHOW Kids | Belajar sambil menemukan hal baru",
   description:

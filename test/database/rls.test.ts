@@ -117,6 +117,26 @@ test("migrations enforce role membership, publication, constraints and storage a
       (await db.query("select * from storage.objects")).rows.length,
       0,
     );
+    await db.exec("reset role");
+    const seed = await readFile(
+      new URL("../../supabase/seed.sql", import.meta.url),
+      "utf8",
+    );
+    await db.exec(seed);
+    await db.exec(seed);
+    assert.equal(
+      (await db.query("select * from public.contents where published")).rows
+        .length,
+      12,
+    );
+    assert.equal(
+      (
+        await db.query(
+          "select distinct category from public.contents where published",
+        )
+      ).rows.length,
+      5,
+    );
   } finally {
     await db.close();
   }

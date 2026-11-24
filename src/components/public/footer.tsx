@@ -7,13 +7,22 @@ export function Footer() {
         <Wordmark />
       </Link>
       <p>Belajar bersama, tumbuh penuh rasa ingin tahu.</p>
-      <a
-        href="https://showtoken.io/kids"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        SHOW Kids
-      </a>
+      <nav className="footer-links" aria-label="SHOW Kids di platform lain">
+        <a
+          href="https://www.youtube.com/@showkidsofficial"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          YouTube
+        </a>
+        <a
+          href="https://showtoken.io/kids"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Tentang SHOW
+        </a>
+      </nav>
     </footer>
   );
 }
