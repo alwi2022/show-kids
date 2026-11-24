@@ -1469,7 +1469,8 @@ textarea {
     font-size: 0.8125rem;
   }
   .admin-login-link > svg {
-    display: none;
+    display: block;
+    flex-shrink: 0;
   }
   .hero-inner {
     gap: 12px;
