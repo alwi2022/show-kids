@@ -14,7 +14,7 @@ export async function CatalogueData({
 }) {
   try {
     const [result, categoryOptions] = await Promise.all([
-      publicCatalogue(filters),
+      publicCatalogue(filters, basePath === "/"),
       categoryNames(),
     ]);
     return (

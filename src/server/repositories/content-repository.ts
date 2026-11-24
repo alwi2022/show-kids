@@ -4,6 +4,51 @@ import type { Content, ContentInput, Filters } from "@/lib/content";
 
 export class ContentRepository {
   constructor(private client: SupabaseClient) {}
+  async featured(
+    slugs: string[],
+    page: number,
+  ): Promise<{ contents: Content[]; count: number; page: number }> {
+    const { data, error } = await this.client
+      .from("contents")
+      .select("*")
+      .eq("published", true)
+      .in("slug", slugs);
+    if (error) throw error;
+    const pinned = slugs.flatMap((slug) =>
+      (data as Content[]).filter((item) => item.slug === slug),
+    );
+    let query = this.client
+      .from("contents")
+      .select("*", { count: "exact" })
+      .eq("published", true);
+    if (pinned.length)
+      query = query.not(
+        "slug",
+        "in",
+        `(${pinned.map((item) => item.slug).join(",")})`,
+      );
+    const start = (page - 1) * 12;
+    const offset = Math.max(0, start - pinned.length);
+    const {
+      data: rest,
+      error: restError,
+      count,
+    } = await query
+      .order("created_at", { ascending: false })
+      .order("id")
+      .range(offset, offset + 11);
+    const total = pinned.length + (count || 0);
+    const last = Math.max(1, Math.ceil(total / 12));
+    if ((!restError || restError.code === "PGRST103") && page > last)
+      return this.featured(slugs, last);
+    if (restError) throw restError;
+    const first = pinned.slice(start, start + 12);
+    return {
+      contents: [...first, ...(rest as Content[]).slice(0, 12 - first.length)],
+      count: total,
+      page,
+    };
+  }
   async list(
     filters: Filters,
     admin = false,

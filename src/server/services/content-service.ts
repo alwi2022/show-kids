@@ -9,6 +9,7 @@ import { AppError, requireAdmin } from "@/server/services/auth-service";
 import type { Content, Filters } from "@/lib/content";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { categoryNames } from "./category-service";
+import { featuredSlugs } from "@/lib/featured-content";
 
 export function splitStorageRef(value: string) {
   const match =
@@ -27,11 +28,15 @@ function resolvedMedia(content: Content) {
   }
   return result;
 }
-export async function publicCatalogue(filters: Filters) {
+export async function publicCatalogue(filters: Filters, featured = false) {
   if (!isSupabaseConfigured())
     return { contents: [] as Content[], count: 0, page: 1 };
   const client = publicClient();
-  const result = await new ContentRepository(client).list(filters);
+  const repo = new ContentRepository(client);
+  const result =
+    featured && !filters.q && !filters.category && !filters.type
+      ? await repo.featured(featuredSlugs, filters.page)
+      : await repo.list(filters);
   return {
     ...result,
     contents: result.contents.map((item) => resolvedMedia(item)),

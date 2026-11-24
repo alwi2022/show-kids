@@ -1,6 +1,9 @@
 import { ContentImage } from "@/components/ui/content-image";
 import Link from "next/link";
-import { publicCatalogue } from "@/server/services/content-service";
+import {
+  publicCatalogue,
+  publicContent,
+} from "@/server/services/content-service";
 import { parseFilters, catalogUrl, videoEmbed } from "@/lib/content";
 import { SingAlongPlayer } from "./singalong-player";
 import { Icon } from "@/components/ui/icon";
@@ -8,6 +11,7 @@ import { Icon } from "@/components/ui/icon";
 const topics = [
   {
     category: "Animal & Nature",
+    slug: "amazing-butterfly-facts",
     title: "Temui penghuni alam",
     description:
       "Dari kupu-kupu sampai lebah. Kenali kehidupan kecil di sekitar kita.",
@@ -15,6 +19,7 @@ const topics = [
   },
   {
     category: "Education Learning",
+    slug: "our-big-beautiful-planet-earth",
     title: "Dunia punya banyak cerita",
     description:
       "Lihat lebih dekat Bumi, Matahari, dan hal-hal yang membuat penasaran.",
@@ -22,6 +27,7 @@ const topics = [
   },
   {
     category: "Healthy Habits",
+    slug: "fakta-seru-vitamin-untuk-anak",
     title: "Kenali tubuhmu",
     description: "Mulai percakapan tentang vitamin dan kebiasaan sehari-hari.",
     icon: "book" as const,
@@ -29,14 +35,15 @@ const topics = [
 ];
 
 export async function ExploreStories() {
-  const { contents } = await publicCatalogue(parseFilters({})).catch(() => ({
-    contents: [],
-    count: 0,
-  }));
-  const available = topics.flatMap((topic) => {
-    const content = contents.find((c) => c.category === topic.category);
-    return content ? [{ ...topic, content }] : [];
-  });
+  const candidates = await Promise.all(
+    topics.map(async (topic) => ({
+      ...topic,
+      content: await publicContent(topic.slug).catch(() => null),
+    })),
+  );
+  const available = candidates.flatMap((topic) =>
+    topic.content ? [{ ...topic, content: topic.content }] : [],
+  );
   if (!available.length) return null;
   return (
     <section

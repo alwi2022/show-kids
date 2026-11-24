@@ -95,6 +95,12 @@ const api = createServer((req, res) => {
     }
     let rows = [
       fixture,
+      {
+        ...fixture,
+        id: "00000000-0000-4000-8000-000000000020",
+        slug: "amazing-butterfly-facts",
+        title: "Featured butterfly",
+      },
       ...Array.from({ length: 13 }, (_, index) => ({
         ...fixture,
         id: `00000000-0000-4000-8000-${String(index + 100).padStart(12, "0")}`,
@@ -120,10 +126,16 @@ const api = createServer((req, res) => {
         duration: null,
       },
     ];
-    if (url.searchParams.has("slug"))
-      rows = rows.filter(
-        (c) => `eq.${c.slug}` === url.searchParams.get("slug"),
+    if (url.searchParams.has("slug")) {
+      const expression = url.searchParams.get("slug");
+      rows = rows.filter((c) =>
+        expression.startsWith("not.in.")
+          ? !expression.slice(8, -1).split(",").includes(c.slug)
+          : expression.startsWith("in.")
+            ? expression.slice(4, -1).split(",").includes(c.slug)
+            : `eq.${c.slug}` === expression,
       );
+    }
     if (url.searchParams.has("id"))
       rows = rows.filter((c) => `eq.${c.id}` === url.searchParams.get("id"));
     if (url.searchParams.has("type"))
