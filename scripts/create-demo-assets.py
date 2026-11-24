@@ -14,10 +14,30 @@ titles = {
     "playtime": ("Bermain dari hal sederhana", "IDE BERMAIN", "#fff0cf"),
     "routine": ("Cerita kecil sehari-hari", "KEGIATAN KELUARGA", "#e3eaff"),
 }
-for key, (title, label, color) in titles.items():
-    cover = f'''<svg xmlns="http://www.w3.org/2000/svg" width="960" height="600" viewBox="0 0 960 600"><rect width="960" height="600" fill="{color}"/><text x="64" y="78" font-family="Arial,sans-serif" font-size="22" font-weight="700" fill="#526080">SHOW KIDS / {label}</text><rect x="540" y="126" width="310" height="356" rx="12" fill="white" transform="rotate(6 695 304)"/><circle cx="640" cy="245" r="47" fill="#5371df"/><rect x="714" y="300" width="78" height="78" rx="5" fill="#ffbe55"/><path d="M568 391l55-93 55 93z" fill="#a48bdd"/><path d="M581 435h196" stroke="#d5dced" stroke-width="9" stroke-linecap="round"/><text x="64" y="244" font-family="Arial,sans-serif" font-size="48" font-weight="700" fill="#182044">{label.split(' &amp; ')[0].replace('&', '&amp;')}</text><text x="64" y="310" font-family="Arial,sans-serif" font-size="25" fill="#526080">{'Worksheet untuk dicetak' if key in ['shapes','counting','patterns'] else 'Bacaan untuk orang tua'}</text><text x="64" y="525" font-family="Arial,sans-serif" font-size="20" fill="#526080">Belajar dan bermain bersama.</text></svg>'''
-    cover = cover.replace('/ BENTUK & WARNA', '/ BENTUK &amp; WARNA').replace('/ ANGKA & BENDA', '/ ANGKA &amp; BENDA').replace('/ POLA & LOGIKA', '/ POLA &amp; LOGIKA')
-    (DEST / f"{key}.svg").write_text(cover, encoding="utf-8")
+def demo_cover(key):
+    from html import escape
+    lines = {
+        "shapes": ["Kenali bentuk", "di sekitarmu"],
+        "counting": ["Ayo hitung", "bersama"],
+        "patterns": ["Apa pola", "berikutnya?"],
+        "reading": ["Membaca bersama", "tanpa terburu-buru"],
+        "playtime": ["Tiga ide bermain", "dengan kertas"],
+        "routine": ["Percakapan kecil", "setelah menonton"],
+    }
+    scenes = {
+        "shapes": '<circle cx="670" cy="230" r="56" fill="#5371df"/><rect x="765" y="300" width="100" height="100" rx="10" fill="#a892e0"/><path d="M580 400l62-104 62 104z" fill="#edbb68"/><path d="M605 454h242" stroke="#dbe0ed" stroke-width="8" stroke-linecap="round"/>',
+        "counting": '<text x="607" y="225" font-family="Arial" font-size="68" font-weight="700" fill="#5371df">1 2 3</text>' + ''.join(f'<circle cx="{610+i*46}" cy="{300+j*58}" r="15" fill="{["#5371df","#a892e0","#edbb68"][j]}"/>' for j in range(3) for i in range(j+1)) + '<rect x="786" y="320" width="67" height="67" rx="10" fill="#f6f7fb" stroke="#bdc7e0" stroke-width="2"/><text x="806" y="366" font-family="Arial" font-size="38" fill="#526080">?</text>',
+        "patterns": '<text x="596" y="213" font-family="Arial" font-size="22" fill="#526080">LANJUTKAN POLANYA</text>' + ''.join(f'<circle cx="{610+i*54}" cy="300" r="20" fill="#5371df"/>' if i%2==0 else f'<rect x="{590+i*54}" y="280" width="40" height="40" rx="5" fill="#a892e0"/>' for i in range(4)) + '<rect x="808" y="276" width="50" height="50" rx="5" fill="#f7f8fb" stroke="#bdc7e0" stroke-width="2" stroke-dasharray="5 5"/><path d="M596 390h250m-250 48h180" stroke="#dbe0ed" stroke-width="8" stroke-linecap="round"/>',
+        "reading": '<path d="M590 226q58-30 118 0v197q-60-30-118 0z" fill="#dce5ff"/><path d="M708 226q60-30 118 0v197q-58-30-118 0z" fill="#e9e0fa"/><path d="M708 226v197" stroke="#8799cb" stroke-width="3"/><circle cx="646" cy="287" r="25" fill="#edbb68"/><path d="M609 348h72m-72 25h58m74-105h59m-59 26h59m-59 26h41" stroke="#8c9ac0" stroke-width="5" stroke-linecap="round"/><path d="m796 185 7-16m17 34 16-7" stroke="#a892e0" stroke-width="5" stroke-linecap="round"/>',
+        "playtime": '<rect x="591" y="202" width="161" height="213" rx="5" fill="#e9e0fa" transform="rotate(-8 671 308)"/><rect x="674" y="233" width="153" height="205" rx="5" fill="#dce5ff" transform="rotate(8 750 335)"/><path d="m642 323 156-65-47 145-35-51z" fill="#5371df"/><path d="m642 323 74 29 82-94" fill="none" stroke="#fff" stroke-width="3"/><circle cx="622" cy="448" r="14" fill="#edbb68"/><rect x="802" y="424" width="28" height="28" rx="5" fill="#a892e0"/>',
+        "routine": '<rect x="595" y="192" width="233" height="153" rx="15" fill="#dce5ff"/><path d="m690 232 56 35-56 35z" fill="#5371df"/><path d="M674 345v24m-40 0h122" stroke="#8799cb" stroke-width="6" stroke-linecap="round"/><path d="M583 402q0-15 15-15h99q15 0 15 15v43q0 15-15 15h-65l-24 19v-19h-10q-15 0-15-15z" fill="#e9e0fa"/><path d="M739 416q0-13 13-13h75q13 0 13 13v34q0 13-13 13h-8v17l-23-17h-44q-13 0-13-13z" fill="#f4e6c9"/><path d="M609 414h75m-75 20h49m91-5h59" stroke="#8c9ac0" stroke-width="4" stroke-linecap="round"/>',
+    }
+    kind = "WORKSHEET / PDF" if key in ["shapes", "counting", "patterns"] else "TIPS FOR PARENTS"
+    text = ''.join(f'<text x="64" y="{267+i*58}" font-family="Arial,sans-serif" font-size="40" font-weight="700" fill="#182044">{escape(line)}</text>' for i,line in enumerate(lines[key]))
+    return f'<svg xmlns="http://www.w3.org/2000/svg" width="960" height="600" viewBox="0 0 960 600"><rect width="960" height="600" fill="#f1f3f8"/><rect x="32" y="32" width="896" height="536" rx="16" fill="#fff" stroke="#dfe2e8"/><text x="64" y="90" font-family="Arial,sans-serif" font-size="20" font-weight="700" fill="#526080">SHOW KIDS</text><rect x="64" y="159" width="250" height="36" rx="6" fill="#edf0fa"/><text x="78" y="183" font-family="Arial,sans-serif" font-size="15" font-weight="700" fill="#3d52a0">{kind}</text>{text}<text x="64" y="509" font-family="Arial,sans-serif" font-size="19" fill="#526080">Belajar dan bermain bersama.</text><rect x="554" y="136" width="334" height="360" rx="18" fill="#f7f8fc"/>{scenes[key]}</svg>'
+
+for key in titles:
+    (DEST / f"{key}.svg").write_text(demo_cover(key), encoding="utf-8")
 
 for key in ["shapes", "counting", "patterns"]:
     c = canvas.Canvas(str(DEST / f"{key}.pdf"), pagesize=A4)

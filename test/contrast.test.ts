@@ -21,6 +21,9 @@ test("design text combinations meet AA and field boundaries are visible", () => 
     "#dceaff",
     "#eee5ff",
     "#ece6ff",
+    "#f6f7f9",
+    "#f0f1f4",
+    "#ececf2",
   ];
   for (const bg of backgrounds) {
     assert.ok(ratio("#182044", bg) >= 4.5, `ink on ${bg}`);

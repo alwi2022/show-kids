@@ -24,7 +24,8 @@ const fixture = {
   slug: "test-fixture-nature",
   category: "Animal & Nature",
   type: "Video",
-  description: "Content used only by the automated HTTP checks.",
+  description:
+    "Content used only by the automated HTTP checks.\n\nLong description paragraph for testing expansion and server-rendered text.\n\nCompanion activity paragraph remains available without JavaScript.",
   thumbnail: "https://example.com/test.png",
   alt_text: "Test image",
   media_url: "https://youtu.be/abcdefghijk",
@@ -245,11 +246,45 @@ try {
   assert.ok(head.includes('property="og:title" content="Test fixture title"'));
   assert.ok(head.includes("application/ld+json"), "JSON-LD must be in head");
   assert.ok(head.includes("VideoObject"));
+  assert.ok(
+    detail.indexOf('class="video-frame"') <
+      detail.indexOf('class="detail-heading"'),
+    "video player precedes title in document order",
+  );
+  assert.ok(
+    detail.includes("Baca deskripsi lengkap") &&
+      detail.includes("Companion activity paragraph"),
+    "full description is server-rendered in native disclosure",
+  );
+  assert.ok(!detail.includes("autoplay=1"));
   assert.equal((detail.match(/<h1(?:\s|>)/g) || []).length, 1);
   const article = await (
     await fetch(`${base}/content/test-fixture-article`)
   ).text();
   assert.ok(article.split("</head>")[0].includes('"@type":"Article"'));
+  assert.ok(
+    article.includes("detail-intro") &&
+      article.includes("Semua tips parenting"),
+  );
+  assert.ok(
+    !article.includes("Buka worksheet (PDF)"),
+    "article has reading/navigation flow without PDF CTA",
+  );
+  const worksheetDetail = await (
+    await fetch(`${base}/content/fixture-worksheet`)
+  ).text();
+  assert.ok(
+    worksheetDetail.includes('href="/assets/demo/shapes.pdf"') &&
+      worksheetDetail.includes("Buka worksheet (PDF)"),
+  );
+  assert.ok(
+    worksheetDetail.includes('target="_blank"') &&
+      worksheetDetail.includes("Terbuka di tab baru."),
+  );
+  assert.ok(
+    worksheetDetail.includes("Semua worksheet") &&
+      worksheetDetail.includes("Tentang worksheet"),
+  );
   const empty = await (await fetch(`${base}/?q=unmatched`)).text();
   assert.ok(empty.includes("Belum ada yang cocok"));
   assert.ok(

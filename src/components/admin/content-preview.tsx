@@ -89,8 +89,8 @@ export function ContentPreview({
             target="_blank"
             rel="noopener noreferrer"
           >
-            <Icon name="download" />
-            Buka dan unduh PDF
+            <Icon name="file" />
+            Buka worksheet (PDF)
           </a>
         )}
         <h3>

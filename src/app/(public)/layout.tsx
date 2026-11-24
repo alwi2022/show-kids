@@ -6,10 +6,10 @@ export default function PublicLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
+    <div className="public-site">
       <Header />
       {children}
       <Footer />
-    </>
+    </div>
   );
 }

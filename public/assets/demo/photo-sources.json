@@ -1,0 +1,44 @@
+[
+  {
+    "key": "reading",
+    "photographer": "Tima Miroshnichenko",
+    "source": "https://www.pexels.com/photo/photo-of-a-parent-reading-a-book-to-her-children-4908531/",
+    "license": "https://www.pexels.com/license/",
+    "asset": "reading-photo.jpg"
+  },
+  {
+    "key": "playtime",
+    "photographer": "Vanessa Loring",
+    "source": "https://www.pexels.com/photo/crop-boy-making-paper-craft-7869457/",
+    "license": "https://www.pexels.com/license/",
+    "asset": "playtime-photo.jpg"
+  },
+  {
+    "key": "routine",
+    "photographer": "Kampus Production",
+    "source": "https://www.pexels.com/photo/mother-talking-to-her-son-8035978/",
+    "license": "https://www.pexels.com/license/",
+    "asset": "routine-photo.jpg"
+  },
+  {
+    "key": "shapes",
+    "photographer": "Towfiqu barbhuiya",
+    "source": "https://www.pexels.com/photo/toy-blocks-in-row-11200121/",
+    "license": "https://www.pexels.com/license/",
+    "asset": "shapes-photo.jpg"
+  },
+  {
+    "key": "counting",
+    "photographer": "Gustavo Fring",
+    "source": "https://www.pexels.com/photo/crop-schoolchild-learning-to-count-at-home-with-tutor-4173107/",
+    "license": "https://www.pexels.com/license/",
+    "asset": "counting-photo.jpg"
+  },
+  {
+    "key": "patterns",
+    "photographer": "Emre Gokceoglu",
+    "source": "https://www.pexels.com/photo/children-engaged-in-educational-activity-at-table-33997598/",
+    "license": "https://www.pexels.com/license/",
+    "asset": "patterns-photo.jpg"
+  }
+]

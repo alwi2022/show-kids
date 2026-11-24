@@ -189,6 +189,31 @@ test("migrations enforce role membership, publication, constraints and storage a
         .rows.length,
       6,
     );
+    const enrichment = await readFile(
+      new URL("../../supabase/enrich-demo-descriptions.sql", import.meta.url),
+      "utf8",
+    );
+    await db.exec(enrichment);
+    assert.equal(
+      (
+        await db.query(
+          "select * from public.contents where published and char_length(description) > 600",
+        )
+      ).rows.length,
+      18,
+    );
+    await db.exec(
+      "update public.contents set description='Edited by admin' where slug='demo-reading'",
+    );
+    await db.exec(enrichment);
+    assert.equal(
+      (
+        await db.query<{ description: string }>(
+          "select description from public.contents where slug='demo-reading'",
+        )
+      ).rows[0].description,
+      "Edited by admin",
+    );
   } finally {
     await db.close();
   }
