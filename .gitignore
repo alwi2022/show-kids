@@ -17,7 +17,7 @@ supabase/.branches/
 /scripts/audit-live-http.mjs
 
 # Local documentation and assistant workspace files
-*.md
+.md
 *.mdx
 !public/assets/SOURCES.md
 .kiro/
