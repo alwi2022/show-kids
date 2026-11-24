@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { ApiResponseError, readApiResponse } from "@/lib/api-response";
 export function LoginForm({ available }: { available: boolean }) {
   const [redirecting, setRedirecting] = useState(false);
   const [error, setError] = useState("");
@@ -22,15 +23,19 @@ export function LoginForm({ available }: { available: boolean }) {
               password: form.get("password"),
             }),
           });
-          const result = await response.json();
+          const result = await readApiResponse(response);
           if (!response.ok) {
-            setError(result.message);
+            setError(result.message || "Login belum berhasil. Coba kembali.");
             return;
           }
           setRedirecting(true);
           window.location.replace("/admin");
-        } catch {
-          setError("Koneksi terputus. Periksa jaringan dan coba kembali.");
+        } catch (error) {
+          setError(
+            error instanceof ApiResponseError
+              ? error.message
+              : "Koneksi terputus. Periksa jaringan dan coba kembali.",
+          );
         } finally {
           setBusy(false);
         }

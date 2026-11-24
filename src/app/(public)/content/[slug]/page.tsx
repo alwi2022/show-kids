@@ -112,30 +112,13 @@ export default async function Detail({ params }: Props) {
               </div>
               {content.type === "Worksheet" && (
                 <div className="worksheet-action">
-                  <a
-                    href={content.media_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="button green"
-                    aria-describedby="worksheet-action-hint"
-                  >
-                    <Icon name="file" />
-                    Buka worksheet (PDF)
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      aria-hidden="true"
-                    >
-                      <path d="M14 4h6v6m0-6-11 11M10 4H4v16h16v-6" />
-                    </svg>
-                  </a>
-                  <p id="worksheet-action-hint">
-                    Terbuka di tab baru. Unduh atau cetak melalui pembaca PDF.
-                  </p>
+                  <div className="worksheet-download-actions">
+                    <a href={`/media/${content.id}/download`} className="button green">
+                      <Icon name="file" />Unduh PDF
+                    </a>
+                    <a href={content.media_url} target="_blank" rel="noopener noreferrer" className="button outline">Buka PDF</a>
+                  </div>
+                  <p>Unduh untuk dicetak, atau buka PDF di tab baru.</p>
                 </div>
               )}
             </div>

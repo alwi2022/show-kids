@@ -1,10 +1,15 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
 import { MotionProvider } from "@/components/ui/motion";
 import { siteUrl } from "@/lib/config";
 import { publicContent } from "@/server/services/content-service";
 import { contentSchema, jsonLd } from "@/lib/seo";
 import "./globals.css";
+import "./public-mobile.css";
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
 export const metadata: Metadata = {
   icons: { icon: "/assets/show/show-kids-avatar.jpg" },
   metadataBase: new URL(siteUrl),

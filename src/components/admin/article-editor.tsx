@@ -21,6 +21,11 @@ export function ArticleEditor({
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState("");
   const fileInput = useRef<HTMLInputElement>(null);
+  const panelInput = useRef<HTMLInputElement>(null);
+  const panelTrigger = useRef<HTMLButtonElement | null>(null);
+  useEffect(() => {
+    if (panel) panelInput.current?.focus();
+  }, [panel]);
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -163,7 +168,12 @@ export function ArticleEditor({
               !editor || disabled || uploading || tool.enabled === false
             }
             aria-pressed={tool.active}
-            onClick={tool.run}
+            onClick={(event) => {
+              if (tool.icon === "link" || tool.icon === "image")
+                panelTrigger.current = event.currentTarget;
+              tool.run();
+              if (panel === tool.icon) panelInput.current?.focus();
+            }}
           >
             <EditorIcon name={tool.icon} />
           </button>
@@ -172,6 +182,14 @@ export function ArticleEditor({
       {panel && (
         <div
           className="article-insert-panel"
+          onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              event.preventDefault();
+              event.stopPropagation();
+              setPanel(null);
+              panelTrigger.current?.focus();
+            }
+          }}
           role="group"
           aria-label={
             panel === "link" ? "Pengaturan link" : "Pengaturan gambar"
@@ -181,6 +199,7 @@ export function ArticleEditor({
             {panel === "link" ? "URL tujuan (HTTPS)" : "URL gambar (HTTPS)"}
           </label>
           <input
+            ref={panelInput}
             id="article-insert-url"
             type="url"
             value={url}

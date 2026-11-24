@@ -2,7 +2,6 @@
 
 - `show/hero-dragon.png`: original blue/lavender baby dragon generated with imagegen on 23 November 2026 at the user's explicit request to replace the hero illustration with a dragon. Transparent background. It is not an official SHOW mascot or copied third-party character. Used in the restored split hero; previous playground removed.
 
-- `discovery.svg`: extracted from the user-provided `show_kids_prototype.html`, reusing its existing inline SVG. It is not presented as official SHOW artwork. No characters from Khan Academy Kids or PBS Kids were copied.
 - `fredoka.ttf`: original variable font from https://github.com/google/fonts/tree/main/ofl/fredoka. License included in `fredoka-OFL.txt`.
 - `dm-sans.ttf`: original variable font from https://github.com/google/fonts/tree/main/ofl/dmsans. License included in `dm-sans-OFL.txt`.
 - Action icons: code-native SVG paths in `src/components/ui/icon.tsx`. Search, video, worksheet, book, and admin meanings map to real controls.
@@ -20,7 +19,7 @@ These SHOW assets are included specifically for the testing use requested by the
 
 ## Library demo assets
 
-`public/assets/demo/*.svg` and `*.pdf` are original geometric sample covers and printable worksheets created for this assessment. They are not official SHOW learning resources. Reproduce them with `python scripts/create-demo-assets.py` (requires ReportLab). `supabase/seed-library-demo.sql` contains the corresponding six sample records.
+`public/assets/demo/*.svg` and `*.pdf` are original geometric sample covers and printable worksheets created for this assessment. They are not official SHOW learning resources. `supabase/seed-library-demo.sql` contains the corresponding six sample records.
 
 Cover revision: original SVG illustrations now differ by topic. Reference research: https://showtoken.io/ describes family-friendly content; business/film financing news was not imported into parenting articles. No third-party article photos copied. All six covers rendered and inspected locally; existing printable PDFs unchanged.
 
@@ -32,7 +31,7 @@ Downloaded from Pexels CDN and stored locally on 23 November 2026. Licensed unde
 - `demo/playtime-photo.jpg`: Vanessa Loring, https://www.pexels.com/photo/crop-boy-making-paper-craft-7869457/
 - `demo/routine-photo.jpg`: Kampus Production, https://www.pexels.com/photo/mother-talking-to-her-son-8035978/
 
-Current `reading.svg`, `playtime.svg`, `routine.svg` embed these photos in a fixed-ratio SVG canvas, retaining seeded URLs. Current worksheet SVGs embed raster previews rendered from the corresponding original bundled PDFs. `python scripts/refresh-library-covers.py` recreates these wrappers using PyMuPDF; run after the original generator if regenerating assets. Photo originals must already exist. PDFs and database contents unchanged. All six current wrappers rendered and inspected locally.
+Current `reading.svg`, `playtime.svg`, `routine.svg` embed these photos in a fixed-ratio SVG canvas, retaining seeded URLs. Current worksheet SVGs embed raster previews rendered from the corresponding original bundled PDFs. PDFs and database contents unchanged. All six current wrappers rendered and inspected locally.
 
 ## Worksheet photo covers (replaces PDF-preview covers)
 
@@ -40,4 +39,4 @@ Current `reading.svg`, `playtime.svg`, `routine.svg` embed these photos in a fix
 - `demo/counting-photo.jpg`: Gustavo Fring, https://www.pexels.com/photo/crop-schoolchild-learning-to-count-at-home-with-tutor-4173107/
 - `demo/patterns-photo.jpg`: Emre Gokceoglu, https://www.pexels.com/photo/children-engaged-in-educational-activity-at-table-33997598/
 
-Pexels license: https://www.pexels.com/license/ . Downloaded locally; photographs illustrate the topic and are not screenshots of the downloadable PDF or endorsements of SHOW. Existing worksheet SVG URLs now embed these photos. PDF files unchanged. `scripts/refresh-library-covers.py` now wraps all six local JPGs using Python stdlib only. New wrappers rendered and inspected.
+Pexels license: https://www.pexels.com/license/ . Downloaded locally; photographs illustrate the topic and are not screenshots of the downloadable PDF or endorsements of SHOW. Existing worksheet SVG URLs now embed these photos. PDF files unchanged. New wrappers rendered and inspected.

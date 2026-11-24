@@ -1,0 +1,386 @@
+@media (max-width: 619px) {
+  .public-site .header-inner {
+    min-height: 72px;
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding-block: 10px;
+  }
+
+  .public-site .site-header .wordmark {
+    font-size: 1.25rem;
+    gap: 4px;
+  }
+
+  .public-site .site-header .wordmark > img {
+    width: 100px;
+    height: auto;
+  }
+
+  .public-site .header-actions {
+    gap: 6px;
+  }
+
+  .public-site .admin-login-link {
+    min-height: 44px;
+    padding-inline: 8px;
+    font-size: 0.75rem;
+  }
+
+  .public-site .menu-toggle {
+    gap: 4px;
+    padding-inline: 8px;
+    font-size: 0.75rem;
+  }
+
+  .public-site .menu-toggle svg {
+    width: 18px;
+  }
+
+  .public-site .hero-inner {
+    gap: 20px;
+    padding-block: 32px 24px;
+  }
+
+  .public-site .hero h1 {
+    font-size: clamp(1.8rem, 7.5vw, 2.7rem);
+    line-height: 1.12;
+  }
+
+  .public-site .hero-description {
+    font-size: 0.9375rem;
+    line-height: 1.65;
+  }
+
+  .public-site .hero-dragon {
+    width: min(65%, 240px);
+    margin-inline: auto;
+  }
+
+  .public-site .discovery-section,
+  .public-site .catalogue {
+    padding-top: 32px;
+  }
+
+  .public-site .section-heading,
+  .public-site .discovery-heading {
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+
+  .public-site .section-heading h2,
+  .public-site .discovery-heading h2 {
+    font-size: 1.65rem;
+  }
+
+  .public-site .section-heading > p,
+  .public-site .discovery-heading > p {
+    font-size: 0.875rem;
+    max-width: none;
+  }
+
+  .public-site .section-label {
+    margin-bottom: 6px;
+    font-size: 0.8125rem;
+  }
+
+  .public-site .search-bar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    padding: 10px;
+    margin-bottom: 14px;
+  }
+
+  .public-site .search-bar > svg {
+    display: none;
+  }
+
+  .public-site .search-bar input:not([type="hidden"]) {
+    grid-column: 1;
+    grid-row: 1;
+    width: 100%;
+    min-width: 0;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-size: 1rem;
+  }
+
+  .public-site .search-bar select {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    min-width: 0;
+    font-size: 1rem;
+  }
+
+  .public-site .search-bar .button {
+    min-height: 44px;
+    padding: 10px 18px;
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .public-site .category-filters {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
+    overflow-x: auto;
+    scroll-padding-inline: 4px;
+    scrollbar-width: thin;
+    padding: 4px 4px 10px;
+    margin-bottom: 14px;
+  }
+
+  .public-site .category-filters a {
+    flex: 0 0 auto;
+    justify-content: center;
+    min-width: 0;
+    max-width: none;
+    padding: 10px 14px;
+    text-align: center;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+
+  .public-site .content-grid,
+  .public-site .skeleton-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 12px;
+  }
+
+  .public-site .discovery-topics {
+    min-width: 0;
+    width: 100%;
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: min(80%, 300px);
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: 6px;
+    scrollbar-width: thin;
+    padding: 6px 6px 12px;
+  }
+
+  .public-site .discovery-topic {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    scroll-snap-align: start;
+  }
+
+  .public-site .discovery-topic .topic-art {
+    aspect-ratio: 1.9;
+    flex: 0 0 auto;
+  }
+
+  .public-site .card-copy {
+    padding: 10px 10px 12px;
+  }
+
+  .public-site .card-copy .category-label {
+    white-space: normal;
+    overflow: visible;
+    overflow-wrap: anywhere;
+    font-size: 0.6875rem;
+    line-height: 1.45;
+    min-height: 2.9em;
+    margin-bottom: 5px;
+  }
+
+  .public-site .card-copy h3 {
+    font-size: clamp(0.9375rem, 3.6vw, 1.125rem);
+    line-height: 1.35;
+    min-height: 4.05em;
+    -webkit-line-clamp: 3;
+  }
+
+  .public-site .new-badge {
+    top: 6px;
+    left: 6px;
+    padding: 2px 5px;
+    font-size: 0.625rem;
+  }
+
+  .public-site .media-label {
+    bottom: 6px;
+    right: 6px;
+    padding: 3px 5px;
+    font-size: 0.625rem;
+    gap: 3px;
+  }
+
+  .public-site .media-label svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .public-site .topic-copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex: 1;
+    padding: 14px;
+  }
+
+  .public-site .topic-icon {
+    width: 28px;
+    height: 28px;
+    margin-bottom: 8px;
+  }
+
+  .public-site .topic-copy h3 {
+    font-size: 1.0625rem;
+    line-height: 1.3;
+    margin-bottom: 8px;
+  }
+
+  .public-site .topic-copy p,
+  .public-site .resource-link p {
+    font-size: 0.875rem;
+    line-height: 1.6;
+    margin-bottom: 10px;
+  }
+
+  .public-site .topic-action,
+  .public-site .text-action {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+  .public-site .topic-action {
+    margin-top: auto;
+  }
+
+  .public-site .quick-access {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    padding-block: 32px;
+  }
+
+  .public-site .resource-link {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr);
+    align-items: start;
+    padding: 18px 16px;
+    gap: 14px;
+  }
+
+  .public-site .resource-link > div {
+    min-width: 0;
+  }
+
+  .public-site .resource-link h2 {
+    font-size: 1.125rem;
+    line-height: 1.4;
+    margin-bottom: 6px;
+  }
+
+  .public-site .resource-icon {
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  .public-site .resource-icon svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .public-site .resource-link .text-action {
+    overflow-wrap: normal;
+  }
+
+  .public-site .singalong {
+    margin-bottom: 32px;
+  }
+
+  .public-site .singalong-art {
+    min-width: 0;
+    min-height: 0;
+    margin: 12px;
+  }
+
+  .public-site .singalong-copy {
+    padding: 8px 16px 20px;
+  }
+
+  .public-site .singalong-copy h2 {
+    font-size: 1.75rem;
+    margin-block: 12px;
+  }
+
+  .public-site .singalong-copy p {
+    font-size: 0.9375rem;
+    line-height: 1.65;
+    margin-bottom: 16px;
+  }
+
+  .public-site .detail-video .video-frame {
+    min-height: 0;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .public-site .detail-heading h1 {
+    font-size: 1.65rem;
+  }
+
+  .public-site .detail-body p {
+    line-height: 1.75;
+  }
+
+  .public-site .video-description,
+  .public-site .article-toc {
+    padding: 16px;
+  }
+
+  .public-site .article-prose h2 {
+    font-size: 1.4rem;
+  }
+
+  .public-site .article-prose h3 {
+    font-size: 1.2rem;
+  }
+
+  .public-site .related-heading {
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .public-site .related-heading h2 {
+    font-size: 1.4rem;
+  }
+
+  .public-site .pagination .page-control {
+    min-width: 44px;
+  }
+
+  .public-site .site-footer {
+    margin-top: 32px;
+  }
+}
+
+@media (max-width: 359px) {
+  .public-site .header-inner {
+    gap: 6px;
+  }
+
+  .public-site .header-actions {
+    gap: 4px;
+  }
+
+  .public-site .site-header .wordmark > img {
+    width: 80px;
+  }
+
+  .public-site .site-header .wordmark {
+    font-size: 1.125rem;
+  }
+}

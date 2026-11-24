@@ -237,7 +237,7 @@ try {
   );
   assert.ok(
     home.includes('id="content-search"'),
-    "catalogue search remains available",
+    "catalogue contains the public search form",
   );
   assert.ok(!home.includes("<canvas"), "background has no WebGL canvas");
   assert.ok(!home.includes('id="playground-title"'), "playground is removed");
@@ -296,11 +296,11 @@ try {
   ).text();
   assert.ok(
     worksheetDetail.includes('href="/assets/demo/shapes.pdf"') &&
-      worksheetDetail.includes("Buka worksheet (PDF)"),
+      worksheetDetail.includes("Unduh PDF") && worksheetDetail.includes("Buka PDF"),
   );
   assert.ok(
     worksheetDetail.includes('target="_blank"') &&
-      worksheetDetail.includes("Terbuka di tab baru."),
+      worksheetDetail.includes("buka PDF di tab baru."),
   );
   assert.ok(
     worksheetDetail.includes("Semua worksheet") &&
@@ -351,6 +351,14 @@ try {
     pdfRedirect.headers.get("location"),
     `${base}/assets/demo/shapes.pdf`,
   );
+  const download = await fetch(`${base}/media/00000000-0000-4000-8000-000000000012/download`);
+  assert.equal(download.status, 200);
+  assert.equal(download.headers.get("content-type"), "application/pdf");
+  assert.match(download.headers.get("content-disposition"), /^attachment; filename="fixture-worksheet.pdf"$/);
+  assert.ok((await download.text()).startsWith("%PDF-"));
+  for (const id of ["invalid", "00000000-0000-4000-8000-000000000099"]) {
+    assert.equal((await fetch(`${base}/media/${id}/download`)).status, 404);
+  }
   const unavailable = await (await fetch(`${base}/?q=simulate-failure`)).text();
   assert.ok(
     unavailable.includes("Katalog sedang sulit dijangkau") &&

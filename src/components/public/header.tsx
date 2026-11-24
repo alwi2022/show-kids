@@ -1,18 +1,26 @@
 "use client";
 import Link from "next/link";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Icon } from "@/components/ui/icon";
+import { NavigationPending } from "@/components/ui/navigation-pending";
+import { HeaderSearch } from "./header-search";
 export function Wordmark() {
+  const [logoFailed, setLogoFailed] = useState(false);
   return (
     <span className="wordmark">
-      <img
-        src="/assets/show/show-logo.png"
-        alt="SHOW"
-        width="146"
-        height="40"
-      />
+      {logoFailed ? (
+        <strong>SHOW</strong>
+      ) : (
+        <img
+          src="/assets/show/show-logo.png"
+          alt="SHOW"
+          width="146"
+          height="40"
+          onError={() => setLogoFailed(true)}
+        />
+      )}
       <span>kids</span>
     </span>
   );
@@ -25,8 +33,14 @@ const links = [
 export function Header() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const changeSearch = useCallback((value: boolean) => {
+    setSearchOpen(value);
+    if (value) setOpen(false);
+  }, []);
   const toggle = useRef<HTMLButtonElement>(null);
   const reduced = useReducedMotion();
+  useEffect(() => { setOpen(false); setSearchOpen(false); }, [pathname]);
   return (
     <header className="site-header">
       <div className="container header-inner">
@@ -41,20 +55,23 @@ export function Header() {
               aria-current={pathname === link.href ? "page" : undefined}
             >
               {link.label}
+              <NavigationPending floating />
             </Link>
           ))}
         </nav>
         <div className="header-actions">
-          <Link href="/admin" className="admin-login-link">
+          <HeaderSearch open={searchOpen} onOpenChange={changeSearch} />
+          <Link href="/admin" className="admin-login-link" aria-label="Login Admin">
             <Icon name="admin" />
             <span>Login Admin</span>
+            <NavigationPending floating />
           </Link>
           <button
             ref={toggle}
             className="menu-toggle"
             aria-expanded={open}
             aria-controls="mobile-nav"
-            onClick={() => setOpen(!open)}
+            onClick={() => { setOpen(!open); setSearchOpen(false); }}
           >
             <Icon name={open ? "close" : "menu"} />
             Menu
@@ -82,9 +99,12 @@ export function Header() {
               <Link
                 key={link.label}
                 href={link.href}
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  if (pathname === link.href) setOpen(false);
+                }}
               >
                 {link.label}
+                <NavigationPending floating />
               </Link>
             ))}
           </motion.nav>

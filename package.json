@@ -13,9 +13,7 @@
     "typecheck": "tsc --noEmit",
     "test": "tsx --test test/*.test.ts",
     "test:db": "tsx --test test/database/*.test.ts",
-    "test:http": "node test/http-smoke.mjs",
-    "seed:show": "node scripts/seed-show.mjs",
-    "check:supabase": "node scripts/check-supabase.mjs"
+    "test:http": "node test/http-smoke.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",

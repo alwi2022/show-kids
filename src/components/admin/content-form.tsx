@@ -1,5 +1,6 @@
 "use client";
 import { ArticleEditor } from "./article-editor";
+import { ApiResponseError, readApiResponse } from "@/lib/api-response";
 import { articlePlainText } from "@/lib/article";
 import { ContentImage } from "@/components/ui/content-image";
 import Link from "next/link";
@@ -148,7 +149,7 @@ export function ContentForm({
               body: new FormData(event.currentTarget),
             },
           );
-          const result = await response.json();
+          const result = await readApiResponse(response);
           if (!response.ok) {
             setErrors(result.errors || {});
             setMessage(result.message || "Konten belum tersimpan.");
@@ -157,9 +158,11 @@ export function ContentForm({
           }
           router.push("/admin?saved=1");
           router.refresh();
-        } catch {
+        } catch (error) {
           setMessage(
-            "Koneksi terputus. Isian tetap tersedia. Coba simpan kembali.",
+            error instanceof ApiResponseError
+              ? error.message
+              : "Koneksi terputus. Isian tetap tersedia. Coba simpan kembali.",
           );
           requestAnimationFrame(() => summary.current?.focus());
         } finally {

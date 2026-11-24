@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { Wordmark } from "@/components/public/header";
 import { LogoutButton } from "./logout-button";
 import { Icon } from "@/components/ui/icon";
+import { NavigationPending } from "@/components/ui/navigation-pending";
 import { useEffect, useRef, useState } from "react";
 
 export function AdminShell({
@@ -19,6 +20,7 @@ export function AdminShell({
   const navTrigger = useRef<HTMLButtonElement>(null);
   const account = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
+  useEffect(() => setNavOpen(false), [pathname]);
   useEffect(() => {
     function outside(event: PointerEvent) {
       if (!account.current?.contains(event.target as Node)) setOpen(false);
@@ -60,24 +62,30 @@ export function AdminShell({
           <Link
             className="cms-nav-link"
             href="/admin"
-            onClick={() => setNavOpen(false)}
+            onClick={() => {
+              if (pathname === "/admin") setNavOpen(false);
+            }}
             aria-current={
               !pathname.startsWith("/admin/categories") ? "page" : undefined
             }
           >
             <Icon name="file" />
             Konten
+            <NavigationPending floating />
           </Link>
           <Link
             className="cms-nav-link"
             href="/admin/categories"
-            onClick={() => setNavOpen(false)}
+            onClick={() => {
+              if (pathname === "/admin/categories") setNavOpen(false);
+            }}
             aria-current={
               pathname.startsWith("/admin/categories") ? "page" : undefined
             }
           >
             <Icon name="book" />
             Kategori
+            <NavigationPending floating />
           </Link>
         </nav>
       </aside>

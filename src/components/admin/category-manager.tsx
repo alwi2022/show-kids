@@ -1,8 +1,9 @@
 "use client";
-import { useRef, useState } from "react";
+import { useRef, useState, useLayoutEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { CategoryRecord } from "@/server/repositories/category-repository";
 import { Icon } from "@/components/ui/icon";
+import { ApiResponseError, readApiResponse } from "@/lib/api-response";
 export function CategoryManager({ rows }: { rows: CategoryRecord[] }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [selected, setSelected] = useState<CategoryRecord | null>(null);
@@ -12,7 +13,16 @@ export function CategoryManager({ rows }: { rows: CategoryRecord[] }) {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const lastTrigger = useRef<HTMLElement | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const cancelButton = useRef<HTMLButtonElement>(null);
+  const nameInput = useRef<HTMLInputElement>(null);
   const router = useRouter();
+  useLayoutEffect(() => {
+    if (!dialogOpen) return;
+    dialog.current?.showModal();
+    if (mode === "delete") cancelButton.current?.focus();
+    else nameInput.current?.focus();
+  }, [dialogOpen, mode]);
   function open(
     record: CategoryRecord | null,
     action: "edit" | "delete",
@@ -23,7 +33,7 @@ export function CategoryManager({ rows }: { rows: CategoryRecord[] }) {
     setName(record?.name || "");
     setMode(action);
     setError("");
-    dialog.current?.showModal();
+    setDialogOpen(true);
   }
   return (
     <>
@@ -98,7 +108,10 @@ export function CategoryManager({ rows }: { rows: CategoryRecord[] }) {
         onCancel={(event) => {
           if (busy) event.preventDefault();
         }}
-        onClose={() => lastTrigger.current?.focus()}
+        onClose={() => {
+          setDialogOpen(false);
+          lastTrigger.current?.focus();
+        }}
       >
         <form
           onSubmit={async (event) => {
@@ -116,7 +129,7 @@ export function CategoryManager({ rows }: { rows: CategoryRecord[] }) {
                   ...(mode !== "delete" ? { body } : {}),
                 },
               );
-              const result = await response.json();
+              const result = await readApiResponse(response);
               if (!response.ok) {
                 setError(result.message || "Kategori belum tersimpan.");
                 return;
@@ -128,8 +141,12 @@ export function CategoryManager({ rows }: { rows: CategoryRecord[] }) {
                   : "Kategori berhasil disimpan.",
               );
               router.refresh();
-            } catch {
-              setError("Koneksi terputus. Coba kembali; isian tetap tersedia.");
+            } catch (error) {
+              setError(
+                error instanceof ApiResponseError
+                  ? error.message
+                  : "Koneksi terputus. Coba kembali; isian tetap tersedia.",
+              );
             } finally {
               setBusy(false);
             }
@@ -151,13 +168,13 @@ export function CategoryManager({ rows }: { rows: CategoryRecord[] }) {
             <div className="field">
               <label htmlFor="category-name">Nama kategori</label>
               <input
+                ref={nameInput}
                 id="category-name"
                 name="name"
                 value={name}
                 onChange={(event) => setName(event.target.value)}
                 required
                 maxLength={80}
-                autoFocus
                 disabled={busy}
               />
             </div>
@@ -169,6 +186,7 @@ export function CategoryManager({ rows }: { rows: CategoryRecord[] }) {
           )}
           <div className="button-row">
             <button
+              ref={cancelButton}
               type="button"
               className="button outline"
               disabled={busy}

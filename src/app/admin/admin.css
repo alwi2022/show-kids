@@ -63,23 +63,11 @@
   width: 105px;
   height: 28px;
 }
-.cms-workspace-label {
-  font-size: 0.875rem;
-  color: #535c6b;
-}
 .cms-topbar-actions {
   margin-left: auto;
   display: flex;
   align-items: center;
   gap: 22px;
-}
-.cms-site-link {
-  font-size: 0.875rem;
-  font-weight: 500;
-  padding: 10px 0;
-}
-.cms-site-link:hover {
-  text-decoration: underline;
 }
 .cms-shell .admin-main {
   width: min(1160px, calc(100% - 48px));
@@ -393,9 +381,6 @@
     padding: 14px 16px;
     gap: 12px;
     flex-wrap: wrap;
-  }
-  .cms-workspace-label {
-    display: none;
   }
   .cms-topbar-actions {
     gap: 14px;
