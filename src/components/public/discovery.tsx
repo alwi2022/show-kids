@@ -1,3 +1,4 @@
+import { ContentImage } from "@/components/ui/content-image";
 import Link from "next/link";
 import { publicCatalogue } from "@/server/services/content-service";
 import { parseFilters, catalogUrl, formatDuration } from "@/lib/content";
@@ -27,7 +28,10 @@ const topics = [
 ];
 
 export async function ExploreStories() {
-  const { contents } = await publicCatalogue(parseFilters({}));
+  const { contents } = await publicCatalogue(parseFilters({})).catch(() => ({
+    contents: [],
+    count: 0,
+  }));
   const available = topics.flatMap((topic) => {
     const content = contents.find((c) => c.category === topic.category);
     return content ? [{ ...topic, content }] : [];
@@ -50,7 +54,7 @@ export async function ExploreStories() {
             className="discovery-topic"
           >
             <div className="topic-art">
-              <img
+              <ContentImage
                 src={topic.content.thumbnail}
                 alt={topic.content.alt_text}
                 width="640"
@@ -76,7 +80,7 @@ export async function ExploreStories() {
 export async function SingAlong() {
   const { contents } = await publicCatalogue(
     parseFilters({ type: "Video", category: "Music & Song" }),
-  );
+  ).catch(() => ({ contents: [], count: 0 }));
   const song =
     contents.find((c) => c.slug === "head-shoulders-knees-and-toes") ||
     contents[0];
@@ -91,7 +95,7 @@ export async function SingAlong() {
         href={`/content/${song.slug}`}
         aria-label={`Tonton ${song.title}`}
       >
-        <img
+        <ContentImage
           src={song.thumbnail}
           alt={song.alt_text}
           width="640"

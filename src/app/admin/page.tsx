@@ -2,8 +2,9 @@ import Link from "next/link";
 import { requireAdminPage } from "@/server/services/auth-service";
 import { adminCatalogue } from "@/server/services/content-service";
 import { parseFilters, contentTypes, catalogUrl } from "@/lib/content";
-import { AdminHeader } from "@/components/admin/admin-header";
-import { DeleteButton } from "@/components/admin/delete-button";
+import { ContentTable } from "@/components/admin/content-table";
+import { Pagination } from "@/components/ui/pagination";
+import { LoadFailure } from "@/components/ui/load-failure";
 import { Icon } from "@/components/ui/icon";
 export default async function AdminPage({
   searchParams,
@@ -13,16 +14,30 @@ export default async function AdminPage({
   await requireAdminPage();
   const params = await searchParams;
   const filters = parseFilters(params);
-  const { contents, count } = await adminCatalogue(filters);
+  let result;
+  try {
+    result = await adminCatalogue(filters);
+  } catch {
+    return (
+      <main id="main" className="container admin-main">
+        <h1>Kelola konten</h1>
+        <LoadFailure
+          title="Daftar konten belum bisa dimuat"
+          description="Data belum dapat dijangkau. Coba lagi; konten yang sudah tersimpan tetap ada."
+        />
+      </main>
+    );
+  }
+  const { contents, count, thumbnails, page } = result;
+  filters.page = page;
   return (
     <>
-      <AdminHeader />
       <main id="main" className="container admin-main">
         <div className="admin-page-heading">
           <div>
             <p className="section-label">Content library</p>
             <h1>Kelola konten</h1>
-            <p>Siapkan, periksa, lalu terbitkan cerita berikutnya.</p>
+            <p>Kelola video, worksheet, dan artikel SHOW Kids.</p>
           </div>
           <Link href="/admin/content/new" className="button green">
             <Icon name="plus" />
@@ -32,6 +47,11 @@ export default async function AdminPage({
         {params.saved === "1" && (
           <p className="success-message" role="status">
             Konten berhasil disimpan.
+          </p>
+        )}
+        {params.deleted === "1" && (
+          <p className="success-message" role="status">
+            Konten berhasil dihapus.
           </p>
         )}
         <form action="/admin" className="admin-filters">
@@ -76,61 +96,10 @@ export default async function AdminPage({
         </form>
         <div className="admin-list-header">
           <span>{count} konten</span>
-          <span>Status / tindakan</span>
+          <span>Diurutkan dari yang terbaru</span>
         </div>
         {contents.length ? (
-          <div className="admin-content-list">
-            {contents.map((content) => (
-              <article key={content.id} className="admin-content-row">
-                <div className="admin-content-info">
-                  <span className="content-type-icon">
-                    <Icon
-                      name={
-                        content.type === "Video"
-                          ? "play"
-                          : content.type === "Worksheet"
-                            ? "file"
-                            : "book"
-                      }
-                    />
-                  </span>
-                  <div>
-                    <p>
-                      {content.type} · {content.category}
-                    </p>
-                    <h2>
-                      <Link href={`/admin/content/${content.id}/edit`}>
-                        {content.title}
-                      </Link>
-                    </h2>
-                    <span className="content-slug">/{content.slug}</span>
-                  </div>
-                </div>
-                <div className="row-actions">
-                  <span
-                    className={`status-badge ${content.published ? "published" : ""}`}
-                  >
-                    {content.published ? "Published" : "Draft"}
-                  </span>
-                  <Link
-                    className="text-button"
-                    href={`/admin/content/${content.id}/edit`}
-                  >
-                    Edit
-                  </Link>
-                  {content.published && (
-                    <Link
-                      className="text-button"
-                      href={`/content/${content.slug}`}
-                    >
-                      Lihat
-                    </Link>
-                  )}
-                  <DeleteButton id={content.id} title={content.title} />
-                </div>
-              </article>
-            ))}
-          </div>
+          <ContentTable contents={contents} thumbnails={thumbnails} />
         ) : (
           <div className="empty-state">
             <Icon name="file" width="42" height="42" />
@@ -158,29 +127,12 @@ export default async function AdminPage({
             </Link>
           </div>
         )}
-        {count > 12 && (
-          <nav className="pagination" aria-label="Halaman CMS">
-            {filters.page > 1 && (
-              <Link
-                className="button outline"
-                href={catalogUrl(filters, { page: filters.page - 1 }, true)}
-              >
-                Sebelumnya
-              </Link>
-            )}
-            <span>
-              Halaman {filters.page} dari {Math.ceil(count / 12)}
-            </span>
-            {filters.page * 12 < count && (
-              <Link
-                className="button outline"
-                href={catalogUrl(filters, { page: filters.page + 1 }, true)}
-              >
-                Berikutnya
-              </Link>
-            )}
-          </nav>
-        )}
+        <Pagination
+          count={count}
+          page={filters.page}
+          href={(page) => catalogUrl(filters, { page }, true)}
+          label="Halaman CMS"
+        />
       </main>
     </>
   );

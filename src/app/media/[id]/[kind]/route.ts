@@ -15,7 +15,7 @@ export async function GET(
   try {
     const url = await publicMedia(id, kind);
     return url
-      ? NextResponse.redirect(url, {
+      ? NextResponse.redirect(new URL(url, request.url), {
           status: 307,
           headers: { "Cache-Control": "no-store" },
         })

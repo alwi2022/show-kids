@@ -17,3 +17,7 @@
 - `supabase/fixtures/show-kids-videos.json` and `supabase/seed.sql` contain 12 curated testing records with verified watch URLs and durations from the channel listing. Descriptions are short editorial summaries, not claimed to be official transcripts.
 
 These SHOW assets are included specifically for the testing use requested by the user. No fictional profile images, testimonials, customer counts, or security claims are used.
+
+## Library demo assets
+
+`public/assets/demo/*.svg` and `*.pdf` are original geometric sample covers and printable worksheets created for this assessment. They are not official SHOW learning resources. Reproduce them with `python scripts/create-demo-assets.py` (requires ReportLab). `supabase/seed-library-demo.sql` contains the corresponding six sample records.

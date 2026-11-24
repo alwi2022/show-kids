@@ -1,17 +1,13 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import { publicCatalogue } from "@/server/services/content-service";
-import { parseFilters, type Filters } from "@/lib/content";
-import { Catalogue } from "@/components/public/catalogue";
+import { parseFilters } from "@/lib/content";
+import { CatalogueData } from "@/components/public/catalogue-data";
+import { CatalogueSkeleton } from "@/components/ui/catalogue-skeleton";
 import { Icon } from "@/components/ui/icon";
 import { ExploreStories, SingAlong } from "@/components/public/discovery";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { alternates: { canonical: "/" } };
-async function CatalogueData({ filters }: { filters: Filters }) {
-  const result = await publicCatalogue(filters);
-  return <Catalogue {...result} filters={filters} />;
-}
 export default async function Home({
   searchParams,
 }: {
@@ -65,8 +61,7 @@ export default async function Home({
             aria-busy="true"
             aria-live="polite"
           >
-            <h2>Popular Series</h2>
-            <p>Memuat katalog konten...</p>
+            <CatalogueSkeleton />
           </section>
         }
       >
@@ -76,10 +71,7 @@ export default async function Home({
         className="container quick-access"
         aria-label="Aktivitas dan bacaan"
       >
-        <Link
-          className="resource-link worksheet-link"
-          href="/?type=Worksheet#catalog"
-        >
+        <Link className="resource-link worksheet-link" href="/worksheet">
           <span className="resource-icon">
             <Icon name="file" width="36" height="36" />
           </span>
@@ -89,10 +81,7 @@ export default async function Home({
             <span className="text-action">Pilih worksheet</span>
           </div>
         </Link>
-        <Link
-          className="resource-link parent-link"
-          href="/?type=Artikel#catalog"
-        >
+        <Link className="resource-link parent-link" href="/parents">
           <span className="resource-icon">
             <Icon name="book" width="36" height="36" />
           </span>

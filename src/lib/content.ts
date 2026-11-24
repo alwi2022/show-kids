@@ -6,7 +6,14 @@ export const categories = [
   "Healthy Habits",
 ] as const;
 export const contentTypes = ["Video", "Worksheet", "Artikel"] as const;
-export type Category = (typeof categories)[number];
+export type Category = string;
+export function demoAsset(value: string, extension: "svg" | "pdf") {
+  const names =
+    extension === "pdf"
+      ? "shapes|counting|patterns"
+      : "shapes|counting|patterns|reading|playtime|routine";
+  return new RegExp(`^/assets/demo/(?:${names})\\.${extension}$`).test(value);
+}
 export type ContentType = (typeof contentTypes)[number];
 export type Content = {
   id: string;
@@ -44,9 +51,7 @@ export function parseFilters(
   const page = Number(str("page"));
   return {
     q: str("q").trim().slice(0, 160),
-    category: categories.includes(str("category") as Category)
-      ? str("category")
-      : "",
+    category: str("category").trim().slice(0, 80),
     type: contentTypes.includes(str("type") as ContentType) ? str("type") : "",
     status: ["published", "draft"].includes(str("status")) ? str("status") : "",
     page: Number.isSafeInteger(page) && page > 0 ? Math.min(page, 10000) : 1,

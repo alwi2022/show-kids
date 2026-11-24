@@ -1,3 +1,4 @@
+import { ContentImage } from "@/components/ui/content-image";
 import { cache } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -74,7 +75,7 @@ export default async function Detail({ params }: Props) {
         </div>
       ) : (
         <div className="detail-cover">
-          <img
+          <ContentImage
             src={content.thumbnail}
             alt={content.alt_text}
             width="1200"

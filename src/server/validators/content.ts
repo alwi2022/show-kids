@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { categories, contentTypes, slugify, videoEmbed } from "@/lib/content";
+import { contentTypes, slugify, videoEmbed, demoAsset } from "@/lib/content";
 
 export function plainText(value: unknown) {
   return typeof value === "string"
@@ -36,7 +36,7 @@ export const contentSchema = z
         /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
         "Gunakan huruf kecil, angka, dan tanda hubung.",
       ),
-    category: z.enum(categories, { error: "Pilih kategori yang tersedia." }),
+    category: z.string().min(1, "Pilih kategori yang tersedia.").max(80),
     type: z.enum(contentTypes, { error: "Pilih tipe konten." }),
     description: z
       .string()
@@ -45,7 +45,8 @@ export const contentSchema = z
     thumbnail: z
       .string()
       .refine(
-        (v) => httpsUrl(v) || storageRef(v, "thumbnails"),
+        (v) =>
+          httpsUrl(v) || storageRef(v, "thumbnails") || demoAsset(v, "svg"),
         "Upload thumbnail atau masukkan URL HTTPS.",
       ),
     alt_text: z.string().min(1, "Alt text wajib diisi.").max(250),
@@ -81,6 +82,7 @@ export const contentSchema = z
       data.type === "Worksheet" &&
       !(
         storageRef(data.media_url, "worksheets") ||
+        demoAsset(data.media_url, "pdf") ||
         (httpsUrl(data.media_url) && /\.pdf(?:\?|$)/i.test(data.media_url))
       )
     )

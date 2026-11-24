@@ -12,7 +12,16 @@ const ratio = (a: string, b: string) => {
   return (l[0] + 0.05) / (l[1] + 0.05);
 };
 test("design text combinations meet AA and field boundaries are visible", () => {
-  const backgrounds = ["#ffffff", "#fafbff", "#eef2ff", "#f0eaff", "#e2dcff", "#dceaff", "#eee5ff", "#ece6ff"];
+  const backgrounds = [
+    "#ffffff",
+    "#fafbff",
+    "#eef2ff",
+    "#f0eaff",
+    "#e2dcff",
+    "#dceaff",
+    "#eee5ff",
+    "#ece6ff",
+  ];
   for (const bg of backgrounds) {
     assert.ok(ratio("#182044", bg) >= 4.5, `ink on ${bg}`);
     assert.ok(ratio("#526080", bg) >= 4.5, `muted on ${bg}`);
@@ -29,4 +38,21 @@ test("design text combinations meet AA and field boundaries are visible", () => 
     assert.ok(ratio(text, "#06070c") >= 4.5, `hero text ${text}`);
   }
   assert.ok(ratio("#bfc5d5", "#10121b") >= 4.5);
+});
+
+test("CMS neutral surfaces, publication status and fields have sufficient contrast", () => {
+  for (const background of ["#ffffff", "#f7f8fa", "#f0f2f5", "#f9fafb"]) {
+    assert.ok(ratio("#191b21", background) >= 4.5);
+    assert.ok(ratio("#5b626e", background) >= 4.5);
+  }
+  assert.ok(ratio("#24479f", "#e9efff") >= 4.5);
+  assert.ok(ratio("#ffffff", "#20252f") >= 4.5);
+  assert.ok(ratio("#818a99", "#ffffff") >= 3);
+});
+test("failure states and preview surfaces preserve text contrast", () => {
+  for (const bg of ["#f7f8fc", "#e9edf7", "#eef2f8", "#edf0f5", "#fafbff"]) {
+    assert.ok(ratio("#526080", bg) >= 4.5);
+    assert.ok(ratio("#191b21", bg) >= 4.5);
+  }
+  assert.ok(ratio("#5b626e", "#fafbff") >= 4.5);
 });

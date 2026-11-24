@@ -22,6 +22,7 @@ test("migrations enforce role membership, publication, constraints and storage a
     for (const file of [
       "202611230001_content_and_admin.sql",
       "202611230002_storage.sql",
+      "202611230003_categories.sql",
     ])
       await db.exec(
         await readFile(
@@ -118,6 +119,46 @@ test("migrations enforce role membership, publication, constraints and storage a
       0,
     );
     await db.exec("reset role");
+    await db.exec("set role anon");
+    assert.equal(
+      (await db.query("select * from public.categories")).rows.length,
+      5,
+    );
+    await assert.rejects(
+      db.exec("insert into public.categories(name) values ('Unauthorized')"),
+    );
+    await db.exec(
+      "reset role; set role authenticated; set request.jwt.claim.sub = '00000000-0000-4000-8000-000000000002'",
+    );
+    await assert.rejects(
+      db.exec("insert into public.categories(name) values ('Unauthorized')"),
+    );
+    await db.exec(
+      "set request.jwt.claim.sub = '00000000-0000-4000-8000-000000000001'",
+    );
+    await db.exec(
+      "insert into public.categories(name) values ('Custom category')",
+    );
+    await assert.rejects(
+      db.exec("insert into public.categories(name) values ('custom category')"),
+    );
+    await db.exec(
+      "update public.contents set category='Custom category' where slug='draft'; update public.categories set name='Renamed category' where name='Custom category'",
+    );
+    assert.equal(
+      (
+        await db.query<{ category: string }>(
+          "select category from public.contents where slug='draft'",
+        )
+      ).rows[0].category,
+      "Renamed category",
+    );
+    await assert.rejects(
+      db.exec("delete from public.categories where name='Renamed category'"),
+    );
+    await db.exec(
+      "update public.contents set category='Education Learning' where slug='draft'; delete from public.categories where name='Renamed category'; reset role",
+    );
     const seed = await readFile(
       new URL("../../supabase/seed.sql", import.meta.url),
       "utf8",
@@ -136,6 +177,17 @@ test("migrations enforce role membership, publication, constraints and storage a
         )
       ).rows.length,
       5,
+    );
+    const librarySeed = await readFile(
+      new URL("../../supabase/seed-library-demo.sql", import.meta.url),
+      "utf8",
+    );
+    await db.exec(librarySeed);
+    await db.exec(librarySeed);
+    assert.equal(
+      (await db.query("select * from public.contents where slug like 'demo-%'"))
+        .rows.length,
+      6,
     );
   } finally {
     await db.close();

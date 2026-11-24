@@ -4,7 +4,10 @@ import type { Content, ContentInput, Filters } from "@/lib/content";
 
 export class ContentRepository {
   constructor(private client: SupabaseClient) {}
-  async list(filters: Filters, admin = false) {
+  async list(
+    filters: Filters,
+    admin = false,
+  ): Promise<{ contents: Content[]; count: number; page: number }> {
     let query = this.client.from("contents").select("*", { count: "exact" });
     if (!admin) query = query.eq("published", true);
     if (admin && filters.status)
@@ -19,8 +22,15 @@ export class ContentRepository {
       .order("created_at", { ascending: false })
       .order("id")
       .range((filters.page - 1) * 12, filters.page * 12 - 1);
+    const lastPage = Math.max(1, Math.ceil((count || 0) / 12));
+    if ((!error || error.code === "PGRST103") && filters.page > lastPage)
+      return this.list({ ...filters, page: lastPage }, admin);
     if (error) throw error;
-    return { contents: data as Content[], count: count || 0 };
+    return {
+      contents: data as Content[],
+      count: count || 0,
+      page: filters.page,
+    };
   }
   async bySlug(slug: string) {
     const { data, error } = await this.client

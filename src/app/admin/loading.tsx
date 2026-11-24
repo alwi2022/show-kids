@@ -1,3 +1,4 @@
+import { CatalogueSkeleton } from "@/components/ui/catalogue-skeleton";
 export default function Loading() {
   return (
     <main
@@ -6,8 +7,7 @@ export default function Loading() {
       aria-live="polite"
       aria-busy="true"
     >
-      <h1>Memuat CMS</h1>
-      <p>Konten sedang disiapkan.</p>
+      <CatalogueSkeleton admin />
     </main>
   );
 }

@@ -6,6 +6,18 @@ import { createRequire } from "node:module";
 import { readFile, writeFile } from "node:fs/promises";
 
 const require = createRequire(import.meta.url);
+const testUser = {
+  id: "00000000-0000-4000-8000-000000000001",
+  aud: "authenticated",
+  role: "authenticated",
+  email: "fixture-admin@example.test",
+  app_metadata: { provider: "email" },
+  user_metadata: {},
+  created_at: "2026-11-23T00:00:00Z",
+};
+const encode = (data) =>
+  Buffer.from(JSON.stringify(data)).toString("base64url");
+const token = `${encode({ alg: "HS256", typ: "JWT" })}.${encode({ sub: testUser.id, aud: "authenticated", exp: Math.floor(Date.now() / 1000) + 3600, role: "authenticated" })}.fixture-signature`;
 const fixture = {
   id: "00000000-0000-4000-8000-000000000010",
   title: "Test fixture nature lesson",
@@ -26,11 +38,77 @@ const fixture = {
   created_at: "2026-11-23T00:00:00Z",
   updated_at: "2026-11-23T00:00:00Z",
 };
+const categoryRows = [
+  "Music & Song",
+  "Education Learning",
+  "Creative & DIY",
+  "Animal & Nature",
+  "Healthy Habits",
+].map((name, index) => ({
+  id: `00000000-0000-4000-8000-${String(index + 30).padStart(12, "0")}`,
+  name,
+  created_at: fixture.created_at,
+}));
 const api = createServer((req, res) => {
   const url = new URL(req.url, "http://localhost");
+  if (url.pathname === "/rest/v1/categories" && req.method === "GET") {
+    res.setHeader("Content-Type", "application/json");
+    res.setHeader(
+      "Content-Range",
+      `0-${categoryRows.length - 1}/${categoryRows.length}`,
+    );
+    return res.end(JSON.stringify(categoryRows));
+  }
+  if (url.pathname === "/auth/v1/token") {
+    res.setHeader("Content-Type", "application/json");
+    return res.end(
+      JSON.stringify({
+        access_token: token,
+        refresh_token: "fixture-refresh-token",
+        token_type: "bearer",
+        expires_in: 3600,
+        user: testUser,
+      }),
+    );
+  }
+  if (
+    url.pathname === "/auth/v1/user" &&
+    req.headers.authorization === `Bearer ${token}`
+  ) {
+    res.setHeader("Content-Type", "application/json");
+    return res.end(JSON.stringify(testUser));
+  }
+  if (
+    url.pathname === "/rest/v1/admin_users" &&
+    req.headers.authorization === `Bearer ${token}`
+  ) {
+    res.setHeader("Content-Type", "application/json");
+    return res.end(JSON.stringify([{ user_id: testUser.id }]));
+  }
   if (url.pathname === "/rest/v1/contents") {
+    if (url.searchParams.get("or")?.includes("simulate-failure")) {
+      res.writeHead(503, { "Content-Type": "application/json" });
+      return res.end(
+        JSON.stringify({ message: "Fixture database unavailable" }),
+      );
+    }
     let rows = [
       fixture,
+      ...Array.from({ length: 13 }, (_, index) => ({
+        ...fixture,
+        id: `00000000-0000-4000-8000-${String(index + 100).padStart(12, "0")}`,
+        slug: `fixture-video-${index}`,
+        title: `Fixture video ${index}`,
+      })),
+      {
+        ...fixture,
+        id: "00000000-0000-4000-8000-000000000012",
+        slug: "fixture-worksheet",
+        title: "Fixture worksheet",
+        type: "Worksheet",
+        media_url: "/assets/demo/shapes.pdf",
+        duration: null,
+      },
       {
         ...fixture,
         id: "00000000-0000-4000-8000-000000000011",
@@ -51,11 +129,19 @@ const api = createServer((req, res) => {
       rows = rows.filter(
         (c) => `eq.${c.type}` === url.searchParams.get("type"),
       );
+    if (url.searchParams.has("category"))
+      rows = rows.filter(
+        (c) => `eq.${c.category}` === url.searchParams.get("category"),
+      );
     if (url.searchParams.get("or")?.includes("unmatched")) rows = [];
+    const count = rows.length;
+    const offset = Number(url.searchParams.get("offset") || 0);
+    const limit = Number(url.searchParams.get("limit") || rows.length);
+    rows = rows.slice(offset, offset + limit);
     res.setHeader("Content-Type", "application/json");
     res.setHeader(
       "Content-Range",
-      `0-${Math.max(0, rows.length - 1)}/${rows.length}`,
+      `${offset}-${Math.max(offset, offset + rows.length - 1)}/${count}`,
     );
     return res.end(JSON.stringify(rows));
   }
@@ -116,8 +202,15 @@ try {
   const home = await (await fetch(base)).text();
   assert.equal((home.match(/<h1(?:\s|>)/g) || []).length, 1);
   assert.ok(home.includes(fixture.title), "public content must be in SSR HTML");
-  assert.ok(home.includes('Hari ini, mau tahu apa?'), 'published content powers topic discovery');
-  assert.ok(!home.includes('dragon-flame') && !home.includes('Buat naga menyemburkan api'), 'dragon no longer has a fire interaction');
+  assert.ok(
+    home.includes("Hari ini, mau tahu apa?"),
+    "published content powers topic discovery",
+  );
+  assert.ok(
+    !home.includes("dragon-flame") &&
+      !home.includes("Buat naga menyemburkan api"),
+    "dragon no longer has a fire interaction",
+  );
   assert.ok(
     home.includes('href="/admin"'),
     "public homepage exposes admin login as required by assessment",
@@ -131,10 +224,7 @@ try {
     home.includes('id="content-search"'),
     "catalogue search remains available",
   );
-  assert.ok(
-    !home.includes('<canvas'),
-    "background has no WebGL canvas",
-  );
+  assert.ok(!home.includes("<canvas"), "background has no WebGL canvas");
   assert.ok(!home.includes('id="playground-title"'), "playground is removed");
   assert.ok(
     home.includes("/assets/show/hero-dragon.png"),
@@ -162,8 +252,57 @@ try {
   assert.ok(article.split("</head>")[0].includes('"@type":"Article"'));
   const empty = await (await fetch(`${base}/?q=unmatched`)).text();
   assert.ok(empty.includes("Belum ada yang cocok"));
-  assert.ok(!empty.includes('Hari ini, mau tahu apa?'), 'search results do not repeat homepage discovery');
+  assert.ok(
+    !empty.includes("Hari ini, mau tahu apa?"),
+    "search results do not repeat homepage discovery",
+  );
   assert.ok(!empty.includes(fixture.title));
+  for (const [path, title] of [
+    ["video", "Satu video, cerita baru."],
+    ["worksheet", "Cetak, coba, ceritakan."],
+    ["parents", "Ruang kecil untuk orang tua."],
+  ]) {
+    const html = await (await fetch(`${base}/${path}`)).text();
+    assert.equal((html.match(/<h1(?:\s|>)/g) || []).length, 1);
+    assert.ok(html.includes(title));
+    assert.ok(
+      html.split("</head>")[0].includes(`href="${base}/${path}"`),
+      "library canonical is rendered server-side",
+    );
+  }
+  const videoPage = await (
+    await fetch(`${base}/video?page=2&category=Animal%20%26%20Nature`)
+  ).text();
+  assert.ok(
+    videoPage.includes("pagination-numbered") &&
+      videoPage.includes('aria-label="Halaman 2" aria-current="page"'),
+  );
+  assert.ok(
+    videoPage.includes("category=Animal") &&
+      !videoPage.includes("Fixture worksheet"),
+  );
+  const beyondEnd = await (await fetch(`${base}/video?page=999`)).text();
+  assert.ok(
+    beyondEnd.includes('aria-label="Halaman 2" aria-current="page"'),
+    "out-of-range pagination returns the last available page",
+  );
+  const pdfRedirect = await fetch(
+    `${base}/media/00000000-0000-4000-8000-000000000012/worksheet`,
+    { redirect: "manual" },
+  );
+  assert.equal(pdfRedirect.status, 307);
+  assert.equal(
+    pdfRedirect.headers.get("location"),
+    `${base}/assets/demo/shapes.pdf`,
+  );
+  const unavailable = await (await fetch(`${base}/?q=simulate-failure`)).text();
+  assert.ok(
+    unavailable.includes("Katalog sedang sulit dijangkau") &&
+      unavailable.includes("hero-dragon.png"),
+    "failed catalogue preserves hero and offers retry",
+  );
+  assert.ok(!unavailable.includes("Petualangan belajar segera hadir"));
+  assert.equal((await fetch(`${base}/assets/demo/shapes.pdf`)).status, 200);
   assert.equal((await fetch(`${base}/content/unpublished`)).status, 404);
   assert.equal(
     (await fetch(`${base}/admin`, { redirect: "manual" })).status,
@@ -203,8 +342,109 @@ try {
     422,
   );
   assert.equal((await fetch(`${base}/media/invalid/thumbnail`)).status, 404);
+  assert.equal(
+    (
+      await fetch(`${base}/api/admin/categories`, {
+        method: "POST",
+        headers: { origin: base },
+      })
+    ).status,
+    401,
+  );
+  const login = await fetch(`${base}/api/admin/login`, {
+    method: "POST",
+    headers: { origin: base, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      email: testUser.email,
+      password: "fixture-only-password",
+    }),
+  });
+  assert.equal(login.status, 200, "mock admin login succeeds");
+  const cookie = login.headers
+    .getSetCookie()
+    .map((value) => value.split(";")[0])
+    .join("; ");
+  assert.ok(cookie, "mock session cookie is created");
+  const adminResponse = await fetch(`${base}/admin`, { headers: { cookie } });
+  assert.equal(adminResponse.status, 200);
+  const adminHtml = await adminResponse.text();
+  assert.ok(
+    adminHtml.includes("cms-sidebar") &&
+      adminHtml.includes("<table") &&
+      adminHtml.includes("cms-table-thumbnail"),
+    "admin has sidebar, semantic table and thumbnails",
+  );
+  assert.ok(
+    !adminHtml.includes("Content management") &&
+      adminHtml.includes("cms-account-trigger"),
+  );
+  assert.ok(
+    !adminHtml.includes("Lihat website") &&
+      adminHtml.includes('href="/admin/categories"'),
+  );
+  const categoriesHtml = await (
+    await fetch(`${base}/admin/categories`, { headers: { cookie } })
+  ).text();
+  assert.ok(
+    categoriesHtml.includes("Tambah kategori") &&
+      categoriesHtml.includes("Animal &amp; Nature"),
+  );
+  const adminUnavailable = await (
+    await fetch(`${base}/admin?q=simulate-failure`, { headers: { cookie } })
+  ).text();
+  assert.ok(
+    adminUnavailable.includes("Daftar konten belum bisa dimuat") &&
+      adminUnavailable.includes("cms-sidebar"),
+  );
+  assert.ok(
+    !adminHtml.includes('class="cms-account-panel"'),
+    "logout is collapsed inside account menu",
+  );
+  assert.ok(
+    adminHtml.includes("Diperbarui") && adminHtml.includes(fixture.title),
+  );
+  const recordResponse = await fetch(`${base}/admin/content/${fixture.id}`, {
+    headers: { cookie },
+    redirect: "manual",
+  });
+  const editorPath = `/admin/content/${fixture.id}/edit`;
+  if (recordResponse.status === 307) {
+    assert.equal(recordResponse.headers.get("location"), editorPath);
+  } else {
+    assert.equal(recordResponse.status, 200);
+    const redirectHtml = await recordResponse.text();
+    assert.ok(
+      redirectHtml.includes('http-equiv="refresh"') &&
+        redirectHtml.includes(`url=${editorPath}`),
+      "streamed legacy page redirects to editor",
+    );
+  }
+  const editorResponse = await fetch(
+    `${base}/admin/content/${fixture.id}/edit`,
+    { headers: { cookie } },
+  );
+  assert.equal(editorResponse.status, 200);
+  const editorHtml = await editorResponse.text();
+  assert.ok(
+    editorHtml.includes("editor-publish") &&
+      editorHtml.includes("cms-publication") &&
+      editorHtml.includes("meta_description"),
+    "editor retains publication and SEO fields",
+  );
+  assert.ok(
+    !editorHtml.includes("editor-jump-links") &&
+      editorHtml.includes("cms-seo-preview") &&
+      editorHtml.includes("cms-live-preview") &&
+      editorHtml.includes("youtube-nocookie.com/embed/"),
+    "editor includes SEO and playable content previews without extra jump navigation",
+  );
+  const createResponse = await fetch(`${base}/admin/content/new`, {
+    headers: { cookie },
+  });
+  assert.equal(createResponse.status, 200);
+  assert.ok((await createResponse.text()).includes("Tambah konten"));
   console.log(
-    "PASS: SSR catalogue, metadata + JSON-LD in head, one H1, real 404, admin redirect, sitemap, robots, origin and authorization checks.",
+    "PASS: public SSR/SEO and authorization checks; mock-session CMS table, legacy redirect, edit and create pages.",
   );
   console.log(
     "Uses an isolated HTTP fixture. Does not verify live Supabase Auth or Storage.",

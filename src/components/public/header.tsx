@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useState, useRef } from "react";
+import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Icon } from "@/components/ui/icon";
 export function Wordmark() {
@@ -17,11 +18,12 @@ export function Wordmark() {
   );
 }
 const links = [
-  { label: "Video", href: "/?type=Video#catalog" },
-  { label: "Worksheet", href: "/?type=Worksheet#catalog" },
-  { label: "Tips for Parents", href: "/?type=Artikel#catalog" },
+  { label: "Video", href: "/video" },
+  { label: "Worksheet", href: "/worksheet" },
+  { label: "Tips for Parents", href: "/parents" },
 ];
 export function Header() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const toggle = useRef<HTMLButtonElement>(null);
   const reduced = useReducedMotion();
@@ -33,7 +35,11 @@ export function Header() {
         </Link>
         <nav className="desktop-nav" aria-label="Navigasi utama">
           {links.map((link) => (
-            <Link key={link.label} href={link.href}>
+            <Link
+              key={link.label}
+              href={link.href}
+              aria-current={pathname === link.href ? "page" : undefined}
+            >
               {link.label}
             </Link>
           ))}

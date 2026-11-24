@@ -7,6 +7,8 @@ import { ContentRepository } from "@/server/repositories/content-repository";
 import { parseContent } from "@/server/validators/content";
 import { AppError, requireAdmin } from "@/server/services/auth-service";
 import type { Content, Filters } from "@/lib/content";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { categoryNames } from "./category-service";
 
 export function splitStorageRef(value: string) {
   const match =
@@ -26,7 +28,8 @@ function resolvedMedia(content: Content) {
   return result;
 }
 export async function publicCatalogue(filters: Filters) {
-  if (!isSupabaseConfigured()) return { contents: [] as Content[], count: 0 };
+  if (!isSupabaseConfigured())
+    return { contents: [] as Content[], count: 0, page: 1 };
   const client = publicClient();
   const result = await new ContentRepository(client).list(filters);
   return {
@@ -67,11 +70,39 @@ export async function publicSitemap() {
 }
 export async function adminCatalogue(filters: Filters) {
   const { client } = await requireAdmin();
-  return new ContentRepository(client).list(filters, true);
+  const result = await new ContentRepository(client).list(filters, true);
+  const thumbnails = Object.fromEntries(
+    await Promise.all(
+      result.contents.map(async (content) => [
+        content.id,
+        await signedAdminMedia(client, content.thumbnail),
+      ]),
+    ),
+  );
+  return { ...result, thumbnails };
 }
 export async function adminContent(id: string) {
   const { client } = await requireAdmin();
   return new ContentRepository(client).byId(id);
+}
+export async function adminThumbnail(content: Content) {
+  const { client } = await requireAdmin();
+  return signedAdminMedia(client, content.thumbnail);
+}
+export async function adminWorksheet(content: Content) {
+  const { client } = await requireAdmin();
+  return content.type === "Worksheet"
+    ? signedAdminMedia(client, content.media_url)
+    : null;
+}
+async function signedAdminMedia(client: SupabaseClient, value: string) {
+  const ref = splitStorageRef(value);
+  if (!ref) return value;
+  const { data, error } = await client.storage
+    .from(ref.bucket)
+    .createSignedUrl(ref.path, 300);
+  if (error) return null;
+  return data.signedUrl;
 }
 function inspectFile(buffer: Buffer, pdf: boolean) {
   if (pdf)
@@ -93,6 +124,11 @@ function inspectFile(buffer: Buffer, pdf: boolean) {
 }
 export async function saveContent(form: FormData, id?: string) {
   const { client } = await requireAdmin();
+  if (!(await categoryNames()).includes(String(form.get("category") || "")))
+    throw new AppError("Pilih kategori yang tersedia.", 422, {
+      category:
+        "Kategori tidak ditemukan. Muat ulang untuk memperbarui pilihan.",
+    });
   const repo = new ContentRepository(client);
   const previous = id ? await repo.byId(id) : null;
   if (id && !previous) throw new AppError("Konten tidak ditemukan.", 404);

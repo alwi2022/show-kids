@@ -36,11 +36,11 @@ test("generates editable ASCII slugs and bounds filter parameters", () => {
   assert.deepEqual(
     parseFilters({
       q: ["bad"],
-      category: "invalid",
+      category: "Custom category",
       page: "-1",
       status: "arbitrary",
     }),
-    { q: "", category: "", type: "", status: "", page: 1 },
+    { q: "", category: "Custom category", type: "", status: "", page: 1 },
   );
   assert.equal(parseFilters({ page: "999999" }).page, 10000);
   const url = catalogUrl(parseFilters({ q: "a&b", type: "Video" }), {
@@ -112,4 +112,21 @@ test("JSON-LD cannot terminate its containing script", () => {
     JSON.parse(encoded).headline,
     "</script><script>alert(1)</script>",
   );
+});
+test("allows bundled worksheet demos and rejects arbitrary local file paths", () => {
+  const form = validForm();
+  form.set("type", "Worksheet");
+  form.set("duration", "");
+  form.set("thumbnail", "/assets/demo/shapes.svg");
+  form.set("media_url", "/assets/demo/shapes.pdf");
+  assert.equal(parseContent(form).success, true);
+  for (const path of [
+    "/assets/demo/../secret.pdf",
+    "//evil.test/document.pdf",
+    "/assets/demo/reading.pdf",
+    "/private/file.pdf",
+  ]) {
+    form.set("media_url", path);
+    assert.equal(parseContent(form).success, false);
+  }
 });

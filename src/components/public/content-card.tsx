@@ -1,3 +1,4 @@
+import { ContentImage } from "@/components/ui/content-image";
 import Link from "next/link";
 import type { Content } from "@/lib/content";
 import { formatDuration } from "@/lib/content";
@@ -10,7 +11,7 @@ export function ContentCard({ content }: { content: Content }) {
       <article className="content-card">
         <Link href={`/content/${content.slug}`}>
           <div className="card-image">
-            <img
+            <ContentImage
               src={content.thumbnail}
               alt={content.alt_text}
               width="640"
