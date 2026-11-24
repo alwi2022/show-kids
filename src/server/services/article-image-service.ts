@@ -2,6 +2,7 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { AppError, getAdmin, requireAdmin } from "./auth-service";
 import { publicClient } from "@/lib/supabase/server";
+import { ContentRepository } from "@/server/repositories/content-repository";
 export async function uploadArticleImage(form: FormData) {
   const { client } = await requireAdmin();
   const file = form.get("image");
@@ -42,15 +43,9 @@ export async function articleImageUrl(name: string) {
   const admin = await getAdmin();
   const client = admin?.client || publicClient();
   if (!admin) {
-    const { data, error } = await client
-      .from("contents")
-      .select("id")
-      .eq("published", true)
-      .eq("type", "Artikel")
-      .like("description", `%/article-images/${name}%`)
-      .limit(1);
-    if (error) throw error;
-    if (!data?.length) return null;
+    const referenced = await new ContentRepository(client)
+      .publishedArticleReferencesImage(name);
+    if (!referenced) return null;
   }
   const { data, error } = await client.storage
     .from("thumbnails")

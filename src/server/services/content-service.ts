@@ -42,6 +42,9 @@ export async function publicCatalogue(filters: Filters, featured = false) {
     contents: result.contents.map((item) => resolvedMedia(item)),
   };
 }
+export async function publicContentExists(slug: string) {
+  return new ContentRepository(publicClient()).publishedSlugExists(slug);
+}
 export const publicContent = cache(async (slug: string) => {
   if (!isSupabaseConfigured()) return null;
   const client = publicClient();

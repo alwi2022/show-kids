@@ -6,6 +6,7 @@ import { createRequire } from "node:module";
 import { readFile, writeFile } from "node:fs/promises";
 
 const require = createRequire(import.meta.url);
+const articleImage = "00000000-0000-4000-8000-000000000050.png";
 const testUser = {
   id: "00000000-0000-4000-8000-000000000001",
   aud: "authenticated",
@@ -52,6 +53,10 @@ const categoryRows = [
 }));
 const api = createServer((req, res) => {
   const url = new URL(req.url, "http://localhost");
+  if (url.pathname === `/storage/v1/object/sign/thumbnails/${articleImage}`) {
+    res.setHeader("Content-Type", "application/json");
+    return res.end(JSON.stringify({ signedURL: `/object/sign/thumbnails/${articleImage}?token=fixture` }));
+  }
   if (url.pathname === "/rest/v1/categories" && req.method === "GET") {
     res.setHeader("Content-Type", "application/json");
     res.setHeader(
@@ -123,7 +128,7 @@ const api = createServer((req, res) => {
         title: "Test fixture article",
         type: "Artikel",
         description:
-          "<p>Intro artikel.</p><h2>Aktivitas bersama</h2><p><strong>Baca</strong> bersama.</p><h3>Persiapan</h3><ul><li>Kertas</li></ul>",
+          `<p>Intro artikel.</p><h2>Aktivitas bersama</h2><p><strong>Baca</strong> bersama.</p><h3>Persiapan</h3><ul><li>Kertas</li></ul><img src="/article-images/${articleImage}" alt="Gambar aktivitas" />`,
         media_url: "",
         duration: null,
       },
@@ -148,6 +153,12 @@ const api = createServer((req, res) => {
       rows = rows.filter(
         (c) => `eq.${c.category}` === url.searchParams.get("category"),
       );
+    if (url.searchParams.has("published"))
+      rows = rows.filter((c) => `eq.${c.published}` === url.searchParams.get("published"));
+    if (url.searchParams.has("description")) {
+      const expression = url.searchParams.get("description");
+      rows = rows.filter((c) => c.description.includes(expression.slice(6, -1)));
+    }
     if (url.searchParams.get("or")?.includes("unmatched")) rows = [];
     const count = rows.length;
     const offset = Number(url.searchParams.get("offset") || 0);
@@ -215,6 +226,11 @@ try {
   }
   assert.ok(ready, `Next server did not become ready: ${output}`);
   const home = await (await fetch(base)).text();
+  const imageResponse = await fetch(`${base}/article-images/${articleImage}`, { redirect: "manual" });
+  assert.equal(imageResponse.status, 307, "published article images redirect to signed storage");
+  assert.ok(imageResponse.headers.get("location")?.includes(`/thumbnails/${articleImage}?token=fixture`));
+  assert.equal((await fetch(`${base}/article-images/00000000-0000-4000-8000-000000000051.png`, { redirect: "manual" })).status, 404, "unreferenced article images remain private");
+  assert.equal((await fetch(`${base}/article-images/invalid.png`, { redirect: "manual" })).status, 404, "invalid image names are rejected");
   for (const path of ["/content/not-existing-review-slug", "/not-existing-review-route"]) {
     const missing = await fetch(`${base}${path}`);
     const html = await missing.text();

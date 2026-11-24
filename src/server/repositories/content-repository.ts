@@ -4,6 +4,27 @@ import type { Content, ContentInput, Filters } from "@/lib/content";
 
 export class ContentRepository {
   constructor(private client: SupabaseClient) {}
+  async publishedSlugExists(slug: string) {
+    const { data, error } = await this.client
+      .from("contents")
+      .select("id")
+      .eq("slug", slug)
+      .eq("published", true)
+      .maybeSingle();
+    if (error) throw error;
+    return Boolean(data);
+  }
+  async publishedArticleReferencesImage(name: string) {
+    const { data, error } = await this.client
+      .from("contents")
+      .select("id")
+      .eq("published", true)
+      .eq("type", "Artikel")
+      .like("description", `%/article-images/${name}%`)
+      .limit(1);
+    if (error) throw error;
+    return Boolean(data?.length);
+  }
   async featured(
     slugs: string[],
     page: number,
